@@ -1,4 +1,4 @@
-package com.android.master.runningplannerapp.ui.theme
+package com.android.master.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

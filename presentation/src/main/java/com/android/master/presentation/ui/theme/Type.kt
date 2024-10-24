@@ -1,4 +1,4 @@
-package com.android.master.runningplannerapp.ui.theme
+package com.android.master.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

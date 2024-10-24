@@ -1,6 +1,5 @@
-package com.android.master.runningplannerapp.ui.theme
+package com.android.master.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
