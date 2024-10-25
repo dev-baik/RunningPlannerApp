@@ -1,5 +1,6 @@
 package com.android.master.runningplannerapp.di
 
+import com.android.master.data.repository.MockRepositoryImpl
 import com.android.master.domain.repository.MockRepository
 import dagger.Binds
 import dagger.Module
