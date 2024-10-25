@@ -1,6 +1,7 @@
 package com.android.master.runningplannerapp.di
 
 import com.android.master.data.datasource.mock.MockDataSource
+import com.android.master.data.datasource.mock.MockDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
