@@ -9,6 +9,11 @@ import javax.inject.Inject
 class GetMockDataUseCase @Inject constructor(
     private val mockRepository: MockRepository
 ) {
-    operator fun invoke(): Flow<ApiResult<MockItem>> =
-        mockRepository.getMockModel()
+    fun getMockModel(): Flow<ApiResult<MockItem>> {
+        return mockRepository.getMockModel()
+    }
+
+    fun getMockData(): Flow<List<MockItem>> {
+        return mockRepository.getMockData()
+    }
 }

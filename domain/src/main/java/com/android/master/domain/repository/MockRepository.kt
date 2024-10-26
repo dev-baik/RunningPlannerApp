@@ -7,4 +7,6 @@ import kotlinx.coroutines.flow.Flow
 interface MockRepository {
 
     fun getMockModel(): Flow<ApiResult<MockItem>>
+
+    fun getMockData(): Flow<List<MockItem>>
 }
