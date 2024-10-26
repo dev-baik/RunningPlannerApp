@@ -2,6 +2,7 @@ package com.android.master.runningplannerapp.di
 
 import android.content.Context
 import androidx.room.Room
+import com.android.master.data.db.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
