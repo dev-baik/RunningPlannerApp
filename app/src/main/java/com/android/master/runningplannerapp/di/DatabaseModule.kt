@@ -3,6 +3,7 @@ package com.android.master.runningplannerapp.di
 import android.content.Context
 import androidx.room.Room
 import com.android.master.data.db.AppDatabase
+import com.android.master.data.db.dao.MockDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,5 +24,11 @@ object DatabaseModule {
             AppDatabase.DB_NAME
         ).fallbackToDestructiveMigration()
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMockDao(database: AppDatabase): MockDao {
+        return database.mockDao()
     }
 }

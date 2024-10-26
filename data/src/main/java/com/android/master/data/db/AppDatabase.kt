@@ -2,6 +2,7 @@ package com.android.master.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.android.master.data.db.dao.MockDao
 import com.android.master.data.db.entity.MockEntity
 
 @Database(entities = [MockEntity::class], version = 1)
