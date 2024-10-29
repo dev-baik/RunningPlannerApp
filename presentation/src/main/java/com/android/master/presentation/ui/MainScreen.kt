@@ -40,9 +40,13 @@ fun Preview() {
 fun MainScreen() {
     val mainViewModel = hiltViewModel<MainViewModel>()
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(bottomBar = {
-        MainBottomNavigationBar(navController)
+        if (NavigationItem.MainNav.isMainRoute(currentRoute)) {
+            MainBottomNavigationBar(navController, currentRoute)
+        }
     }) { paddingValues ->
         MainNavigationScreen(
             viewModel = mainViewModel,
@@ -53,7 +57,10 @@ fun MainScreen() {
 }
 
 @Composable
-fun MainBottomNavigationBar(navController: NavController) {
+fun MainBottomNavigationBar(
+    navController: NavController,
+    currentRoute: String?
+) {
     val bottomNavigationItems = listOf(
         NavigationItem.MainNav.Home,
         NavigationItem.MainNav.Diary,
@@ -64,9 +71,6 @@ fun MainBottomNavigationBar(navController: NavController) {
         containerColor = Color.White,
         contentColor = Color.Black,
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-
         bottomNavigationItems.forEach { item ->
             NavigationBarItem(
                 icon = {

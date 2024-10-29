@@ -14,6 +14,15 @@ sealed class NavigationItem(open val route: String) {
         object Home : MainNav(MAIN_HOME, Icons.Default.Home, NavigationTitle.MAIN_HOME)
         object Diary : MainNav(MAIN_DIARY, Icons.Default.DateRange, NavigationTitle.MAIN_DIARY)
         object MyPage : MainNav(MAIN_MY_PAGE, Icons.Default.AccountCircle, NavigationTitle.MAIN_MY_PAGE)
+
+        companion object {
+            fun isMainRoute(route: String?) : Boolean {
+                return when (route) {
+                    MAIN_HOME, MAIN_DIARY, MAIN_MY_PAGE -> true
+                    else -> false
+                }
+            }
+        }
     }
 }
 
