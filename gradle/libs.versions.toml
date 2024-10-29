@@ -1,15 +1,16 @@
 [versions]
+activityCompose = "1.9.3"
 agp = "8.6.0"
-hilt = "2.48"
-kotlin = "1.9.0"
+appcompat = "1.7.0"
+composeBom = "2024.04.01"
 coreKtx = "1.13.1"
+espressoCore = "3.6.1"
+hilt = "2.48"
+hiltNavigation = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
-espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.6"
-activityCompose = "1.9.3"
-composeBom = "2024.04.01"
-appcompat = "1.7.0"
+kotlin = "1.9.0"
 loggingInterceptor = "4.12.0"
 material = "1.12.0"
 navigation = "2.8.3"
@@ -32,6 +33,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigation" }
 navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
