@@ -20,13 +20,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.android.master.presentation.ui.home.DiaryScreen
+import com.android.master.presentation.ui.home.HomeScreen
+import com.android.master.presentation.ui.home.MyPageScreen
 import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
+import com.android.master.presentation.viewmodel.MainViewModel
 
 sealed class MainNavigationItem(
     val route: String,
@@ -48,14 +53,16 @@ fun Preview() {
 
 @Composable
 fun MainScreen() {
+    val mainViewModel = hiltViewModel<MainViewModel>()
     val navController = rememberNavController()
 
     Scaffold(bottomBar = {
         MainBottomNavigationBar(navController)
     }) { paddingValues ->
         MainNavigationScreen(
-            navController,
-            Modifier.padding(paddingValues)
+            viewModel = mainViewModel,
+            navController = navController,
+            modifier = Modifier.padding(paddingValues)
         )
     }
 }
@@ -113,6 +120,7 @@ fun MainBottomNavigationBar(navController: NavController) {
 
 @Composable
 fun MainNavigationScreen(
+    viewModel: MainViewModel,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -122,13 +130,13 @@ fun MainNavigationScreen(
         modifier = modifier
     ) {
         composable(MainNavigationItem.Main.route) {
-            Text(text = "Main")
+            HomeScreen(viewModel)
         }
         composable(MainNavigationItem.Diary.route) {
-            Text(text = "Diary")
+            DiaryScreen(viewModel)
         }
         composable(MainNavigationItem.MyPage.route) {
-            Text(text = "MyPage")
+            MyPageScreen(viewModel)
         }
     }
 }
