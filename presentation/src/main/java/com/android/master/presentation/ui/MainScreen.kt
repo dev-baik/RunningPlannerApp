@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,6 +25,7 @@ import com.android.master.presentation.ui.home.DiaryScreen
 import com.android.master.presentation.ui.home.HomeScreen
 import com.android.master.presentation.ui.home.MyPageScreen
 import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
+import com.android.master.presentation.utils.NavigationUtils
 import com.android.master.presentation.viewmodel.MainViewModel
 
 @Preview(showBackground = true)
@@ -58,7 +58,7 @@ fun MainScreen() {
 
 @Composable
 fun MainBottomNavigationBar(
-    navController: NavController,
+    navController: NavHostController,
     currentRoute: String?
 ) {
     val bottomNavigationItems = listOf(
@@ -89,15 +89,11 @@ fun MainBottomNavigationBar(
                 },
                 selected = currentRoute == item.route,
                 onClick = {
-                    navController.navigate(item.route) {
-                        navController.graph.startDestinationRoute?.let {
-                            popUpTo(it) {
-                                saveState = true
-                            }
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    NavigationUtils.navigate(
+                        navController,
+                        item.route,
+                        navController.graph.startDestinationRoute
+                    )
                 },
                 colors = NavigationBarItemDefaults.colors(
                     indicatorColor = Color.Transparent
