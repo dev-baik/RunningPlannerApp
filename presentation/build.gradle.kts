@@ -72,4 +72,7 @@ dependencies {
     // navigation
     implementation(libs.navigation)
     implementation(libs.hilt.navigation.compose)
+
+    // gson
+    implementation(libs.gson)
 }
