@@ -2,10 +2,6 @@ package com.android.master.presentation.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -16,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,16 +27,6 @@ import com.android.master.presentation.ui.home.HomeScreen
 import com.android.master.presentation.ui.home.MyPageScreen
 import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
 import com.android.master.presentation.viewmodel.MainViewModel
-
-sealed class MainNavigationItem(
-    val route: String,
-    val icon: ImageVector,
-    val title: String
-) {
-    object Main : MainNavigationItem("Main", Icons.Default.Home, "홈")
-    object Diary : MainNavigationItem("Diary", Icons.Default.DateRange, "다이어리")
-    object MyPage : MainNavigationItem("MyPage", Icons.Default.AccountCircle, "마이페이지")
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -70,9 +55,9 @@ fun MainScreen() {
 @Composable
 fun MainBottomNavigationBar(navController: NavController) {
     val bottomNavigationItems = listOf(
-        MainNavigationItem.Main,
-        MainNavigationItem.Diary,
-        MainNavigationItem.MyPage
+        NavigationItem.MainNav.Home,
+        NavigationItem.MainNav.Diary,
+        NavigationItem.MainNav.MyPage
     )
 
     NavigationBar(
@@ -126,16 +111,16 @@ fun MainNavigationScreen(
 ) {
     NavHost(
         navController = navController,
-        startDestination = MainNavigationItem.Main.route,
+        startDestination = NavigationRouteName.MAIN_HOME,
         modifier = modifier
     ) {
-        composable(MainNavigationItem.Main.route) {
+        composable(NavigationRouteName.MAIN_HOME) {
             HomeScreen(viewModel)
         }
-        composable(MainNavigationItem.Diary.route) {
+        composable(NavigationRouteName.MAIN_DIARY) {
             DiaryScreen(viewModel)
         }
-        composable(MainNavigationItem.MyPage.route) {
+        composable(NavigationRouteName.MAIN_MY_PAGE) {
             MyPageScreen(viewModel)
         }
     }
