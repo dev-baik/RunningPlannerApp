@@ -30,6 +30,7 @@ object NavigationRouteName {
     const val MAIN_HOME = "main_home"
     const val MAIN_DIARY = "main_diary"
     const val MAIN_MY_PAGE = "main_my_page"
+    const val TEMP = "temp"
 }
 
 object NavigationTitle {
