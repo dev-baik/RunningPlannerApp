@@ -17,13 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.android.master.domain.model.TempItem
 import com.android.master.presentation.ui.main.DiaryScreen
 import com.android.master.presentation.ui.main.HomeScreen
 import com.android.master.presentation.ui.main.MyPageScreen
@@ -31,7 +28,6 @@ import com.android.master.presentation.ui.temp.TempScreen
 import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
 import com.android.master.presentation.utils.NavigationUtils
 import com.android.master.presentation.viewmodel.MainViewModel
-import com.google.gson.Gson
 
 @Preview(showBackground = true)
 @Composable
@@ -129,11 +125,10 @@ fun MainNavigationScreen(
             MyPageScreen(viewModel)
         }
         composable(
-            route = NavigationRouteName.TEMP + "/{tempArg}",
-            arguments = listOf(navArgument("tempArg") { type = NavType.StringType })
+            route = Temp.routeWithArgName(),
+            arguments = Temp.arguments,
         ) {
-            val tempString = it.arguments?.getString("tempArg")
-            val tempItem = Gson().fromJson(tempString, TempItem::class.java)
+            val tempItem = Temp.findArgument(it)
             if (tempItem != null) {
                 TempScreen(tempItem = tempItem)
             }
