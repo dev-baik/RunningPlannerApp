@@ -21,9 +21,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.android.master.presentation.ui.home.DiaryScreen
-import com.android.master.presentation.ui.home.HomeScreen
-import com.android.master.presentation.ui.home.MyPageScreen
+import com.android.master.presentation.ui.main.DiaryScreen
+import com.android.master.presentation.ui.main.HomeScreen
+import com.android.master.presentation.ui.main.MyPageScreen
 import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
 import com.android.master.presentation.utils.NavigationUtils
 import com.android.master.presentation.viewmodel.MainViewModel
