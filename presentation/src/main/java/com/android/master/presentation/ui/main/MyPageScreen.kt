@@ -2,6 +2,7 @@ package com.android.master.presentation.ui.main
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,18 +12,45 @@ import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
+import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.OAuthLoginCallback
 
 @Composable
 fun MyPageScreen(viewModel: ViewModel) {
     val context = LocalContext.current
     val kakaoClient = UserApiClient.instance
 
-    Button(onClick = { kakaoClient.kakaoLogin(context) }) {
-        Text("카카오 로그인")
+    Column {
+        Button(onClick = { kakaoClient.loginKakao(context) }) {
+            Text("카카오 로그인")
+        }
+        Button(onClick = { loginNaver(context) }) {
+            Text("네이버 로그인")
+        }
     }
 }
 
-private fun UserApiClient.kakaoLogin(context: Context) {
+fun loginNaver(context: Context) {
+    val oauthLoginCallback = object : OAuthLoginCallback {
+        override fun onSuccess() {
+            Log.i("NaverLogin", NaverIdLoginSDK.getAccessToken().toString())
+        }
+
+        override fun onFailure(httpStatus: Int, message: String) {
+            val errorCode = NaverIdLoginSDK.getLastErrorCode().code
+            val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
+            Log.e("NaverLogin", "errorCode:$errorCode, errorDesc:$errorDescription")
+        }
+
+        override fun onError(errorCode: Int, message: String) {
+            onFailure(errorCode, message)
+        }
+    }
+
+    NaverIdLoginSDK.authenticate(context, oauthLoginCallback)
+}
+
+private fun UserApiClient.loginKakao(context: Context) {
     if (isKakaoTalkLoginAvailable(context)) {
         loginWithKakaoTalk(context) { token, error -> handleKakaoLoginResult(token, error) }
     } else {
