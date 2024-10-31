@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -14,6 +16,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        buildConfigField("String", "KAKAO_API_KEY", getProperty("KAKAO_API_KEY"))
+        manifestPlaceholders["kakaoKey"] = getProperty("KAKAO_API_KEY")
     }
 
     buildTypes {
@@ -75,4 +79,11 @@ dependencies {
 
     // gson
     implementation(libs.gson)
+
+    // kakao login
+    implementation(libs.kakao.login)
+}
+
+fun getProperty(propertyKey: String): String {
+    return gradleLocalProperties(rootDir, providers).getProperty(propertyKey)
 }
