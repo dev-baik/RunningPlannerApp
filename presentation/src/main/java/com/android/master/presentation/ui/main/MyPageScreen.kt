@@ -2,7 +2,6 @@ package com.android.master.presentation.ui.main
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,11 +10,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModel
-import com.android.master.presentation.BuildConfig
+import com.android.master.presentation.viewmodel.MainViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
@@ -25,7 +23,10 @@ import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.OAuthLoginCallback
 
 @Composable
-fun MyPageScreen(viewModel: ViewModel) {
+fun MyPageScreen(
+    viewModel: MainViewModel,
+    googleSignInClient: GoogleSignInClient
+) {
     val context = LocalContext.current
     val kakaoClient = UserApiClient.instance
     val googleLoginForResult = rememberLauncherForActivityResult(
@@ -42,14 +43,6 @@ fun MyPageScreen(viewModel: ViewModel) {
         }
     }
 
-    val googleLoginClientIntent: Intent = GoogleSignInOptions
-        .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(BuildConfig.GOOGLE_CLIENT_ID)
-        .requestEmail()
-        .build().let {
-            GoogleSignIn.getClient(context, it).signInIntent
-        }
-
     Column {
         Button(onClick = { kakaoClient.loginKakao(context) }) {
             Text("카카오 로그인")
@@ -57,7 +50,7 @@ fun MyPageScreen(viewModel: ViewModel) {
         Button(onClick = { loginNaver(context) }) {
             Text("네이버 로그인")
         }
-        Button(onClick = { googleLoginForResult.launch(googleLoginClientIntent) }) {
+        Button(onClick = { googleLoginForResult.launch(googleSignInClient.signInIntent) }) {
             Text("구글 로그인")
         }
     }

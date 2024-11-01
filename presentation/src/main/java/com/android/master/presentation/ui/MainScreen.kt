@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,20 +24,12 @@ import com.android.master.presentation.ui.main.DiaryScreen
 import com.android.master.presentation.ui.main.HomeScreen
 import com.android.master.presentation.ui.main.MyPageScreen
 import com.android.master.presentation.ui.temp.TempScreen
-import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
 import com.android.master.presentation.utils.NavigationUtils
 import com.android.master.presentation.viewmodel.MainViewModel
-
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    RunningPlannerAppTheme {
-        MainScreen()
-    }
-}
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 
 @Composable
-fun MainScreen() {
+fun MainScreen(googleSignInClient: GoogleSignInClient) {
     val mainViewModel = hiltViewModel<MainViewModel>()
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -52,6 +43,7 @@ fun MainScreen() {
         MainNavigationScreen(
             viewModel = mainViewModel,
             navController = navController,
+            googleSignInClient = googleSignInClient,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -108,6 +100,7 @@ fun MainBottomNavigationBar(
 fun MainNavigationScreen(
     viewModel: MainViewModel,
     navController: NavHostController,
+    googleSignInClient: GoogleSignInClient,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -122,7 +115,7 @@ fun MainNavigationScreen(
             DiaryScreen(viewModel)
         }
         composable(NavigationRouteName.MAIN_MY_PAGE) {
-            MyPageScreen(viewModel)
+            MyPageScreen(viewModel, googleSignInClient)
         }
         composable(
             route = Temp.routeWithArgName(),
