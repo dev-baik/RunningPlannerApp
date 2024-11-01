@@ -21,6 +21,7 @@ android {
         buildConfigField("String", "NAVER_CLIENT_ID", getProperty("NAVER_CLIENT_ID"))
         buildConfigField("String", "NAVER_CLIENT_NAME", getProperty("NAVER_CLIENT_NAME"))
         buildConfigField("String", "NAVER_CLIENT_SECRET", getProperty("NAVER_CLIENT_SECRET"))
+        buildConfigField("String", "GOOGLE_CLIENT_ID", getProperty("GOOGLE_CLIENT_ID"))
     }
 
     buildTypes {
@@ -88,6 +89,14 @@ dependencies {
 
     // naver login
     implementation(libs.naver.login)
+
+    // gms
+    implementation(libs.gms.classpath)
+    implementation(libs.gms.auth)
+
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
 }
 
 fun getProperty(propertyKey: String): String {
