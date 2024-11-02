@@ -2,6 +2,7 @@ package com.android.master.runningplannerapp.di
 
 import com.android.master.data.datasource.mock.MockDataSource
 import com.android.master.data.datasource.mock.MockDataSourceImpl
+import com.android.master.domain.repository.AccountRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,4 +14,7 @@ interface DataSourceModule {
 
     @Binds
     fun bindsMockDataSource(mockDataSourceImpl: MockDataSourceImpl): MockDataSource
+
+    @Binds
+    fun bindAccountRepository(accountRepositoryImpl: AccountRepositoryImpl): AccountRepository
 }
