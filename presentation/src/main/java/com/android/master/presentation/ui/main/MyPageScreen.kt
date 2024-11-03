@@ -2,18 +2,23 @@ package com.android.master.presentation.ui.main
 
 import android.app.Activity
 import android.util.Log
+import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -38,9 +45,11 @@ fun MyPageScreen(
     viewModel: MainViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
+    val focusRequester = remember { FocusRequester() }
     var email by rememberSaveable { mutableStateOf("") }
     var password by remember { mutableStateOf(value = "") }
     var showPassword by remember { mutableStateOf(value = false) }
+    var isError by rememberSaveable { mutableStateOf(false) }
 
     val googleLoginForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -62,9 +71,38 @@ fun MyPageScreen(
             label = { Text("이메일") },
             onValueChange = {
                 email = it
+                isError = false
+            },
+            trailingIcon = {
+                if (isError) {
+                    Icon(
+                        imageVector = Icons.Filled.Error,
+                        contentDescription = "error",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
             },
             singleLine = true,
+            isError = isError,
+            keyboardActions = KeyboardActions(onDone = {
+                if (!isEmailValid(email)) {
+                    isError = true
+                } else {
+                    focusRequester.requestFocus()
+                }
+            }),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            )
         )
+        if (isError) {
+            Text(
+                text = "유효하지 않은 이메일 형식입니다.",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
 
         OutlinedTextField(
             value = password,
@@ -93,7 +131,8 @@ fun MyPageScreen(
                     }
                 }
             },
-            singleLine = true
+            singleLine = true,
+            modifier = Modifier.focusRequester(focusRequester)
         )
 
         Spacer(Modifier.size(50.dp))
@@ -102,4 +141,8 @@ fun MyPageScreen(
             Text("구글 로그인")
         }
     }
+}
+
+fun isEmailValid(email: String): Boolean {
+    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
