@@ -16,11 +16,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-        buildConfigField("String", "KAKAO_API_KEY", getProperty("KAKAO_API_KEY"))
-        manifestPlaceholders["kakaoKey"] = getProperty("KAKAO_API_KEY")
-        buildConfigField("String", "NAVER_CLIENT_ID", getProperty("NAVER_CLIENT_ID"))
-        buildConfigField("String", "NAVER_CLIENT_NAME", getProperty("NAVER_CLIENT_NAME"))
-        buildConfigField("String", "NAVER_CLIENT_SECRET", getProperty("NAVER_CLIENT_SECRET"))
         buildConfigField("String", "GOOGLE_CLIENT_ID", getProperty("GOOGLE_CLIENT_ID"))
     }
 
@@ -83,12 +78,6 @@ dependencies {
 
     // gson
     implementation(libs.gson)
-
-    // kakao login
-    implementation(libs.kakao.login)
-
-    // naver login
-    implementation(libs.naver.login)
 
     // gms
     implementation(libs.gms.classpath)

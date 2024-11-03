@@ -1,21 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <application>
-
-        <!-- Kakao 로그인 -->
-        <activity
-            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- TODO scheme 변경 -->
-                <data android:host="oauth"
-                    android:scheme="kakaoe11e656c76d3f47caa555a42c3f5dd87" />
-            </intent-filter>
-        </activity>
-    </application>
 </manifest>
