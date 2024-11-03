@@ -66,73 +66,27 @@ fun MyPageScreen(
     }
 
     Column {
-        OutlinedTextField(
-            value = email,
-            label = { Text("이메일") },
-            onValueChange = {
+        EmailInputTextField(
+            email = email,
+            onEmailChange = {
                 email = it
                 isError = false
             },
-            trailingIcon = {
-                if (isError) {
-                    Icon(
-                        imageVector = Icons.Filled.Error,
-                        contentDescription = "error",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            singleLine = true,
             isError = isError,
-            keyboardActions = KeyboardActions(onDone = {
+            onDone = {
                 if (!isEmailValid(email)) {
                     isError = true
                 } else {
                     focusRequester.requestFocus()
                 }
-            }),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            )
+            }
         )
-        if (isError) {
-            Text(
-                text = "유효하지 않은 이메일 형식입니다.",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        }
-
-        OutlinedTextField(
-            value = password,
-            label = { Text("비밀번호") },
-            onValueChange = { password = it },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            visualTransformation = if (showPassword) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            trailingIcon = {
-                if (showPassword) {
-                    IconButton(onClick = { showPassword = false }) {
-                        Icon(
-                            imageVector = Icons.Filled.Visibility,
-                            contentDescription = "hide_password"
-                        )
-                    }
-                } else {
-                    IconButton(onClick = { showPassword = true }) {
-                        Icon(
-                            imageVector = Icons.Filled.VisibilityOff,
-                            contentDescription = "hide_password"
-                        )
-                    }
-                }
-            },
-            singleLine = true,
-            modifier = Modifier.focusRequester(focusRequester)
+        PasswordInputField(
+            password = password,
+            onPasswordChange = { password = it },
+            showPassword = showPassword,
+            onTogglePasswordVisibility = { showPassword = !showPassword },
+            focusRequester = focusRequester
         )
 
         Spacer(Modifier.size(50.dp))
@@ -141,6 +95,83 @@ fun MyPageScreen(
             Text("구글 로그인")
         }
     }
+}
+
+@Composable
+private fun EmailInputTextField(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    isError: Boolean,
+    onDone: () -> Unit
+) {
+    OutlinedTextField(
+        value = email,
+        label = { Text("이메일") },
+        onValueChange = onEmailChange,
+        trailingIcon = {
+            if (isError) {
+                Icon(
+                    imageVector = Icons.Filled.Error,
+                    contentDescription = "error",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        singleLine = true,
+        isError = isError,
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email
+        )
+    )
+    if (isError) {
+        Text(
+            text = "유효하지 않은 이메일 형식입니다.",
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
+}
+
+@Composable
+private fun PasswordInputField(
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    showPassword: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    focusRequester: FocusRequester
+) {
+    OutlinedTextField(
+        value = password,
+        label = { Text("비밀번호") },
+        onValueChange = onPasswordChange,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        visualTransformation = if (showPassword) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
+        trailingIcon = {
+            if (showPassword) {
+                IconButton(onClick = onTogglePasswordVisibility) {
+                    Icon(
+                        imageVector = Icons.Filled.Visibility,
+                        contentDescription = "hide_password"
+                    )
+                }
+            } else {
+                IconButton(onClick = onTogglePasswordVisibility) {
+                    Icon(
+                        imageVector = Icons.Filled.VisibilityOff,
+                        contentDescription = "hide_password"
+                    )
+                }
+            }
+        },
+        singleLine = true,
+        modifier = Modifier.focusRequester(focusRequester)
+    )
 }
 
 fun isEmailValid(email: String): Boolean {
