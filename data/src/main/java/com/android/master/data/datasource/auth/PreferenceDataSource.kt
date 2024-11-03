@@ -1,0 +1,47 @@
+package com.android.master.data.datasource.auth
+
+import android.content.Context
+import android.content.SharedPreferences
+import com.android.master.domain.model.AccountInfo
+import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+
+class PreferenceDataSource @Inject constructor(
+    @ApplicationContext context: Context
+) {
+
+    private fun getPreference(context: Context): SharedPreferences {
+        return context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+    }
+
+    private val prefs by lazy { getPreference(context) }
+    private val editor by lazy { prefs.edit() }
+    private val gson = Gson()
+
+    private fun putString(key: String, data: String?) {
+        editor.putString(key, data)
+        editor.apply()
+    }
+
+    private fun getString(key: String, defValue: String? = null): String? {
+        return prefs.getString(key, defValue)
+    }
+
+    fun putAccountInfo(accountInfo: AccountInfo) {
+        putString(ACCOUNT_INFO, gson.toJson(accountInfo))
+    }
+
+    fun getAccountInfo(): AccountInfo? {
+        return gson.fromJson(getString(ACCOUNT_INFO), AccountInfo::class.java)
+    }
+
+    fun removeAccountInfo() {
+        putString(ACCOUNT_INFO, null)
+    }
+
+    companion object {
+        private const val PREFERENCE_NAME = "preference_name"
+        private const val ACCOUNT_INFO = "account_info"
+    }
+}
