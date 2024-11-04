@@ -20,7 +20,10 @@ import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
+import com.navercorp.nid.profile.NidProfileCallback
+import com.navercorp.nid.profile.data.NidProfileResponse
 
 @Composable
 fun MyPageScreen(
@@ -59,13 +62,11 @@ fun MyPageScreen(
 fun loginNaver(context: Context) {
     val oauthLoginCallback = object : OAuthLoginCallback {
         override fun onSuccess() {
-            Log.i("NaverLogin", NaverIdLoginSDK.getAccessToken().toString())
+            fetchNaverUserProfile()
         }
 
         override fun onFailure(httpStatus: Int, message: String) {
-            val errorCode = NaverIdLoginSDK.getLastErrorCode().code
-            val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-            Log.e("NaverLogin", "errorCode:$errorCode, errorDesc:$errorDescription")
+            logNaverError("NaverLogin")
         }
 
         override fun onError(errorCode: Int, message: String) {
@@ -76,6 +77,22 @@ fun loginNaver(context: Context) {
     NaverIdLoginSDK.authenticate(context, oauthLoginCallback)
 }
 
+private fun fetchNaverUserProfile() {
+    NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
+        override fun onSuccess(result: NidProfileResponse) {
+            Log.i("NaverProfile", result.toString())
+        }
+
+        override fun onFailure(httpStatus: Int, message: String) {
+            logNaverError("NaverProfile")
+        }
+
+        override fun onError(errorCode: Int, message: String) {
+            onFailure(errorCode, message)
+        }
+    })
+}
+
 private fun UserApiClient.loginKakao(context: Context) {
     if (isKakaoTalkLoginAvailable(context)) {
         loginWithKakaoTalk(context) { token, error -> handleKakaoLoginResult(token, error) }
@@ -84,16 +101,22 @@ private fun UserApiClient.loginKakao(context: Context) {
     }
 }
 
+private fun logNaverError(tag: String) {
+    val errorCode = NaverIdLoginSDK.getLastErrorCode().code
+    val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
+    Log.e(tag, "errorCode:$errorCode, errorDesc:$errorDescription")
+}
+
 private fun handleKakaoLoginResult(token: OAuthToken?, error: Throwable?) {
     if (error != null) {
         if (isLoginCancelled(error)) return
         Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
         return
     }
-    token?.let { fetchUserProfile() }
+    token?.let { fetchKakaoUserProfile() }
 }
 
-private fun fetchUserProfile() {
+private fun fetchKakaoUserProfile() {
     UserApiClient.instance.me { user, error ->
         if (error != null) {
             Log.e("KakaoProfile", "사용자 정보 가져오기 실패", error)
