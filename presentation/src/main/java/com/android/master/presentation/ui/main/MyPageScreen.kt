@@ -158,7 +158,11 @@ private fun fetchKakaoUserProfile(viewModel: MainViewModel) {
             Log.e("KakaoProfile", "사용자 정보 가져오기 실패", error)
         } else {
             user?.let {
-                Log.i("KakaoPrifle", "${it.id} ${it.kakaoAccount?.email}")
+                createUserWithEmailAndPassword(
+                    viewModel = viewModel,
+                    email = it.kakaoAccount?.email.orEmpty(),
+                    uid = it.id.toString()
+                )
             }
         }
     }
