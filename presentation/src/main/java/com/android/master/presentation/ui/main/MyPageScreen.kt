@@ -18,6 +18,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.AuthResult
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -50,8 +52,6 @@ fun MyPageScreen(
                     GoogleSignIn.getSignedInAccountFromIntent(it)
                 handleGoogleLoginResult(task, viewModel)
             }
-        } else {
-            Log.e("GoogleLogin", result.toString())
         }
     }
 
@@ -59,7 +59,7 @@ fun MyPageScreen(
         Button(onClick = { kakaoClient.loginKakao(context) }) {
             Text("카카오 로그인")
         }
-        Button(onClick = { loginNaver(context) }) {
+        Button(onClick = { loginNaver(context, viewModel) }) {
             Text("네이버 로그인")
         }
         Button(onClick = { googleLoginForResult.launch(googleSignInClient.signInIntent) }) {
@@ -77,12 +77,11 @@ private fun handleGoogleLoginResult(
     Firebase.auth.signInWithCredential(credential)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                viewModel.signIn(
-                    AccountInfo(
-                        accountId = task.result.user?.uid,
-                        email = account.email,
-                        type = AccountInfo.LoginType.GOOGLE
-                    )
+                signInAccountInfo(
+                    viewModel = viewModel,
+                    task = task,
+                    email = account.email.orEmpty(),
+                    type = AccountInfo.LoginType.GOOGLE
                 )
             } else {
                 viewModel.signOut()
@@ -91,38 +90,82 @@ private fun handleGoogleLoginResult(
         }
 }
 
-fun loginNaver(context: Context) {
+fun loginNaver(
+    context: Context,
+    viewModel: MainViewModel,
+) {
     val oauthLoginCallback = object : OAuthLoginCallback {
-        override fun onSuccess() {
-            fetchNaverUserProfile()
-        }
-
-        override fun onFailure(httpStatus: Int, message: String) {
-            logNaverError("NaverLogin")
-        }
-
-        override fun onError(errorCode: Int, message: String) {
-            onFailure(errorCode, message)
-        }
+        override fun onSuccess() { fetchNaverUserProfile(viewModel) }
+        override fun onFailure(httpStatus: Int, message: String) {}
+        override fun onError(errorCode: Int, message: String) {}
     }
 
     NaverIdLoginSDK.authenticate(context, oauthLoginCallback)
 }
 
-private fun fetchNaverUserProfile() {
+private fun fetchNaverUserProfile(viewModel: MainViewModel) {
     NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
         override fun onSuccess(result: NidProfileResponse) {
-            Log.i("NaverProfile", result.toString())
+            val email = result.profile?.email ?: ""
+            val uid = result.profile?.id ?: ""
+
+            if (email.isEmpty() || uid.isEmpty()) return
+
+            Firebase.auth.createUserWithEmailAndPassword(email, uid)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        signInAccountInfo(
+                            viewModel = viewModel,
+                            task = task,
+                            email = email,
+                            type = AccountInfo.LoginType.NAVER
+                        )
+                    } else {
+                        viewModel.signOut()
+                        Firebase.auth.signOut()
+                    }
+                }
+                .addOnFailureListener {
+                    if (it is FirebaseAuthUserCollisionException) {
+                        Firebase.auth.signInWithEmailAndPassword(email, uid)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    signInAccountInfo(
+                                        viewModel = viewModel,
+                                        task = task,
+                                        email = email,
+                                        type = AccountInfo.LoginType.NAVER
+                                    )
+                                } else {
+                                    Log.e("FirebaseNaverLogin", "네이버계정으로 로그인 실패")
+                                    viewModel.signOut()
+                                    Firebase.auth.signOut()
+                                }
+                            }
+                    } else {
+                        Log.e("FirebaseNaverLogin", "네이버계정으로 회원가입 실패")
+                    }
+                }
         }
 
-        override fun onFailure(httpStatus: Int, message: String) {
-            logNaverError("NaverProfile")
-        }
-
-        override fun onError(errorCode: Int, message: String) {
-            onFailure(errorCode, message)
-        }
+        override fun onFailure(httpStatus: Int, message: String) {}
+        override fun onError(errorCode: Int, message: String) {}
     })
+}
+
+private fun signInAccountInfo(
+    viewModel: MainViewModel,
+    task: Task<AuthResult>,
+    email: String,
+    type: AccountInfo.LoginType
+) {
+    viewModel.signIn(
+        AccountInfo(
+            accountId = task.result.user?.uid,
+            email = email,
+            type = type
+        )
+    )
 }
 
 private fun UserApiClient.loginKakao(context: Context) {
@@ -131,12 +174,6 @@ private fun UserApiClient.loginKakao(context: Context) {
     } else {
         loginWithKakaoAccount(context) { token, error -> handleKakaoLoginResult(token, error) }
     }
-}
-
-private fun logNaverError(tag: String) {
-    val errorCode = NaverIdLoginSDK.getLastErrorCode().code
-    val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
-    Log.e(tag, "errorCode:$errorCode, errorDesc:$errorDescription")
 }
 
 private fun handleKakaoLoginResult(token: OAuthToken?, error: Throwable?) {
