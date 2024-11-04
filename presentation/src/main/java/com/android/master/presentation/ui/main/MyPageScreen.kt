@@ -56,7 +56,7 @@ fun MyPageScreen(
     }
 
     Column {
-        Button(onClick = { kakaoClient.loginKakao(context) }) {
+        Button(onClick = { kakaoClient.loginKakao(context, viewModel) }) {
             Text("카카오 로그인")
         }
         Button(onClick = { loginNaver(context, viewModel) }) {
@@ -110,12 +110,13 @@ fun loginNaver(
 private fun fetchNaverUserProfile(viewModel: MainViewModel) {
     NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
         override fun onSuccess(result: NidProfileResponse) {
-            val email = result.profile?.email ?: ""
-            val uid = result.profile?.id ?: ""
-
-            if (email.isEmpty() || uid.isEmpty()) return
-
-            createUserWithEmailAndPassword(viewModel, email, uid)
+            result.profile?.let {
+                createUserWithEmailAndPassword(
+                    viewModel = viewModel,
+                    email = it.email.orEmpty(),
+                    uid = it.id.orEmpty()
+                )
+            }
         }
 
         override fun onFailure(httpStatus: Int, message: String) {}
@@ -123,39 +124,35 @@ private fun fetchNaverUserProfile(viewModel: MainViewModel) {
     })
 }
 
-private fun signInAccountInfo(
-    viewModel: MainViewModel,
-    task: Task<AuthResult>,
-    email: String,
-    type: AccountInfo.LoginType
+private fun UserApiClient.loginKakao(
+    context: Context,
+    viewModel: MainViewModel
 ) {
-    viewModel.signIn(
-        AccountInfo(
-            accountId = task.result.user?.uid,
-            email = email,
-            type = type
-        )
-    )
-}
-
-private fun UserApiClient.loginKakao(context: Context) {
     if (isKakaoTalkLoginAvailable(context)) {
-        loginWithKakaoTalk(context) { token, error -> handleKakaoLoginResult(token, error) }
+        loginWithKakaoTalk(context) { token, error ->
+            handleKakaoLoginResult(viewModel, token, error)
+        }
     } else {
-        loginWithKakaoAccount(context) { token, error -> handleKakaoLoginResult(token, error) }
+        loginWithKakaoAccount(context) { token, error ->
+            handleKakaoLoginResult(viewModel, token, error)
+        }
     }
 }
 
-private fun handleKakaoLoginResult(token: OAuthToken?, error: Throwable?) {
+private fun handleKakaoLoginResult(
+    viewModel: MainViewModel,
+    token: OAuthToken?,
+    error: Throwable?
+) {
     if (error != null) {
         if (isLoginCancelled(error)) return
         Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
         return
     }
-    token?.let { fetchKakaoUserProfile() }
+    token?.let { fetchKakaoUserProfile(viewModel) }
 }
 
-private fun fetchKakaoUserProfile() {
+private fun fetchKakaoUserProfile(viewModel: MainViewModel) {
     UserApiClient.instance.me { user, error ->
         if (error != null) {
             Log.e("KakaoProfile", "사용자 정보 가져오기 실패", error)
@@ -194,7 +191,7 @@ private fun createUserWithEmailAndPassword(
             if (it is FirebaseAuthUserCollisionException) {
                 signInWithEmailAndPassword(viewModel, email, uid)
             } else {
-                Log.e("FirebaseNaverLogin", "네이버계정으로 회원가입 실패")
+                Log.e("FirebaseSignIn", "회원가입 실패")
             }
         }
 }
@@ -214,9 +211,24 @@ private fun signInWithEmailAndPassword(
                     type = AccountInfo.LoginType.NAVER
                 )
             } else {
-                Log.e("FirebaseNaverLogin", "네이버계정으로 로그인 실패")
+                Log.e("FirebaseSignIn", "로그인 실패")
                 viewModel.signOut()
                 Firebase.auth.signOut()
             }
         }
+}
+
+private fun signInAccountInfo(
+    viewModel: MainViewModel,
+    task: Task<AuthResult>,
+    email: String,
+    type: AccountInfo.LoginType
+) {
+    viewModel.signIn(
+        AccountInfo(
+            accountId = task.result.user?.uid,
+            email = email,
+            type = type
+        )
+    )
 }
