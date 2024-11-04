@@ -7,12 +7,16 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.getString
 import com.android.master.domain.model.AccountInfo
+import com.android.master.presentation.R
 import com.android.master.presentation.viewmodel.MainViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -32,17 +36,21 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.navercorp.nid.profile.NidProfileCallback
 import com.navercorp.nid.profile.data.NidProfileResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun MyPageScreen(
     viewModel: MainViewModel,
-    googleSignInClient: GoogleSignInClient
+    googleSignInClient: GoogleSignInClient,
+    scaffoldState: SnackbarHostState
 ) {
     val accountInfo by viewModel.accountInfo.collectAsState()
     Log.i("AccountInfo", accountInfo.toString())
 
+    val scope = rememberCoroutineScope()
+
     val context = LocalContext.current
-    val kakaoClient = UserApiClient.instance
     val googleLoginForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -50,27 +58,37 @@ fun MyPageScreen(
             result.data?.let {
                 val task: Task<GoogleSignInAccount> =
                     GoogleSignIn.getSignedInAccountFromIntent(it)
-                signInWithCredential(task, viewModel)
+                signInWithCredential(context, task, viewModel, scope, scaffoldState)
             }
         }
     }
 
     Column {
-        Button(onClick = { kakaoClient.loginKakao(context, viewModel) }) {
-            Text("카카오 로그인")
+        LoginButton("카카오 로그인") {
+            UserApiClient.instance.loginKakao(context, viewModel, scope, scaffoldState)
         }
-        Button(onClick = { loginNaver(context, viewModel) }) {
-            Text("네이버 로그인")
+        LoginButton("네이버 로그인") {
+            loginNaver(context, viewModel, scope, scaffoldState)
         }
-        Button(onClick = { googleLoginForResult.launch(googleSignInClient.signInIntent) }) {
-            Text("구글 로그인")
+        LoginButton("구글 로그인") {
+            googleLoginForResult.launch(googleSignInClient.signInIntent)
         }
     }
 }
 
+@Composable
+fun LoginButton(text: String, onClick: () -> Unit) {
+    Button(onClick = onClick) {
+        Text(text)
+    }
+}
+
 private fun signInWithCredential(
+    context: Context,
     accountTask: Task<GoogleSignInAccount>,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
 ) {
     val account = accountTask.result ?: return
     val credential = GoogleAuthProvider.getCredential(account.idToken, null)
@@ -78,13 +96,23 @@ private fun signInWithCredential(
     Firebase.auth.signInWithCredential(credential)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                signInAccountInfo(
+                saveAccountInfo(
                     viewModel = viewModel,
                     task = task,
                     email = account.email.orEmpty(),
                     type = AccountInfo.LoginType.GOOGLE
                 )
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_success_message)
+                )
             } else {
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_failed_message)
+                )
                 viewModel.signOut()
                 Firebase.auth.signOut()
             }
@@ -94,10 +122,12 @@ private fun signInWithCredential(
 fun loginNaver(
     context: Context,
     viewModel: MainViewModel,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
 ) {
     val oauthLoginCallback = object : OAuthLoginCallback {
         override fun onSuccess() {
-            fetchNaverUserProfile(viewModel)
+            fetchNaverUserProfile(context, viewModel, scope, scaffoldState)
         }
 
         override fun onFailure(httpStatus: Int, message: String) {}
@@ -107,14 +137,23 @@ fun loginNaver(
     NaverIdLoginSDK.authenticate(context, oauthLoginCallback)
 }
 
-private fun fetchNaverUserProfile(viewModel: MainViewModel) {
+private fun fetchNaverUserProfile(
+    context: Context,
+    viewModel: MainViewModel,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
+) {
     NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
         override fun onSuccess(result: NidProfileResponse) {
             result.profile?.let {
                 createUserWithEmailAndPassword(
+                    context = context,
                     viewModel = viewModel,
                     email = it.email.orEmpty(),
-                    uid = it.id.orEmpty()
+                    uid = it.id.orEmpty(),
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    type = AccountInfo.LoginType.NAVER
                 )
             }
         }
@@ -126,42 +165,64 @@ private fun fetchNaverUserProfile(viewModel: MainViewModel) {
 
 private fun UserApiClient.loginKakao(
     context: Context,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
 ) {
     if (isKakaoTalkLoginAvailable(context)) {
         loginWithKakaoTalk(context) { token, error ->
-            handleKakaoLoginResult(viewModel, token, error)
+            handleKakaoLoginResult(context, viewModel, token, error, scope, scaffoldState)
         }
     } else {
         loginWithKakaoAccount(context) { token, error ->
-            handleKakaoLoginResult(viewModel, token, error)
+            handleKakaoLoginResult(context, viewModel, token, error, scope, scaffoldState)
         }
     }
 }
 
 private fun handleKakaoLoginResult(
+    context: Context,
     viewModel: MainViewModel,
     token: OAuthToken?,
-    error: Throwable?
+    error: Throwable?,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
 ) {
     if (error != null) {
         if (isLoginCancelled(error)) return
-        Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
+        popupSnackBar(
+            scope = scope,
+            scaffoldState = scaffoldState,
+            message = getString(context, R.string.login_failed_message)
+        )
         return
     }
-    token?.let { fetchKakaoUserProfile(viewModel) }
+    token?.let { fetchKakaoUserProfile(context, viewModel, scope, scaffoldState) }
 }
 
-private fun fetchKakaoUserProfile(viewModel: MainViewModel) {
+private fun fetchKakaoUserProfile(
+    context: Context,
+    viewModel: MainViewModel,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState
+) {
     UserApiClient.instance.me { user, error ->
         if (error != null) {
-            Log.e("KakaoProfile", "사용자 정보 가져오기 실패", error)
+            popupSnackBar(
+                scope = scope,
+                scaffoldState = scaffoldState,
+                message = getString(context, R.string.login_failed_message)
+            )
         } else {
             user?.let {
                 createUserWithEmailAndPassword(
+                    context = context,
                     viewModel = viewModel,
                     email = it.kakaoAccount?.email.orEmpty(),
-                    uid = it.id.toString()
+                    uid = it.id.toString(),
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    type = AccountInfo.LoginType.KAKAO
                 )
             }
         }
@@ -173,56 +234,89 @@ private fun isLoginCancelled(error: Throwable): Boolean {
 }
 
 private fun createUserWithEmailAndPassword(
+    context: Context,
     viewModel: MainViewModel,
     email: String,
-    uid: String
+    uid: String,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState,
+    type: AccountInfo.LoginType
 ) {
     Firebase.auth.createUserWithEmailAndPassword(email, uid)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                signInAccountInfo(
+                saveAccountInfo(
                     viewModel = viewModel,
                     task = task,
                     email = email,
-                    type = AccountInfo.LoginType.NAVER
+                    type = type
                 )
-            } else {
-                viewModel.signOut()
-                Firebase.auth.signOut()
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_success_message)
+                )
             }
         }
         .addOnFailureListener {
             if (it is FirebaseAuthUserCollisionException) {
-                signInWithEmailAndPassword(viewModel, email, uid)
+                signInWithEmailAndPassword(
+                    context = context,
+                    viewModel = viewModel,
+                    email = email,
+                    uid = uid,
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    type = type
+                )
             } else {
-                Log.e("FirebaseSignIn", "회원가입 실패")
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_failed_message)
+                )
+                viewModel.signOut()
+                Firebase.auth.signOut()
             }
         }
 }
 
 private fun signInWithEmailAndPassword(
+    context: Context,
     viewModel: MainViewModel,
     email: String,
-    uid: String
+    uid: String,
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState,
+    type: AccountInfo.LoginType
 ) {
     Firebase.auth.signInWithEmailAndPassword(email, uid)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                signInAccountInfo(
+                saveAccountInfo(
                     viewModel = viewModel,
                     task = task,
                     email = email,
-                    type = AccountInfo.LoginType.NAVER
+                    type = type
+                )
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_success_message)
                 )
             } else {
-                Log.e("FirebaseSignIn", "로그인 실패")
+                popupSnackBar(
+                    scope = scope,
+                    scaffoldState = scaffoldState,
+                    message = getString(context, R.string.login_failed_message)
+                )
                 viewModel.signOut()
                 Firebase.auth.signOut()
             }
         }
 }
 
-private fun signInAccountInfo(
+private fun saveAccountInfo(
     viewModel: MainViewModel,
     task: Task<AuthResult>,
     email: String,
@@ -235,4 +329,14 @@ private fun signInAccountInfo(
             type = type
         )
     )
+}
+
+fun popupSnackBar(
+    scope: CoroutineScope,
+    scaffoldState: SnackbarHostState,
+    message: String,
+) {
+    scope.launch {
+        scaffoldState.showSnackbar(message = message)
+    }
 }

@@ -2,14 +2,19 @@ package com.android.master.presentation.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,15 +40,28 @@ fun MainScreen(googleSignInClient: GoogleSignInClient) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(bottomBar = {
-        if (NavigationItem.MainNav.isMainRoute(currentRoute)) {
-            MainBottomNavigationBar(navController, currentRoute)
+    val scaffoldState = remember { SnackbarHostState() }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = scaffoldState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    shape = RoundedCornerShape(10.dp),
+                )
+            }
+        },
+        bottomBar = {
+            if (NavigationItem.MainNav.isMainRoute(currentRoute)) {
+                MainBottomNavigationBar(navController, currentRoute)
+            }
         }
-    }) { paddingValues ->
+    ) { paddingValues ->
         MainNavigationScreen(
             viewModel = mainViewModel,
             navController = navController,
             googleSignInClient = googleSignInClient,
+            scaffoldState = scaffoldState,
             modifier = Modifier.padding(paddingValues)
         )
     }
@@ -101,6 +119,7 @@ fun MainNavigationScreen(
     viewModel: MainViewModel,
     navController: NavHostController,
     googleSignInClient: GoogleSignInClient,
+    scaffoldState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -115,7 +134,7 @@ fun MainNavigationScreen(
             DiaryScreen(viewModel)
         }
         composable(NavigationRouteName.MAIN_MY_PAGE) {
-            MyPageScreen(viewModel, googleSignInClient)
+            MyPageScreen(viewModel, googleSignInClient, scaffoldState)
         }
         composable(
             route = Temp.routeWithArgName(),
