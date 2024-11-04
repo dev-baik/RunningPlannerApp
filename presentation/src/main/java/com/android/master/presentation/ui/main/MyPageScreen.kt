@@ -50,7 +50,7 @@ fun MyPageScreen(
             result.data?.let {
                 val task: Task<GoogleSignInAccount> =
                     GoogleSignIn.getSignedInAccountFromIntent(it)
-                handleGoogleLoginResult(task, viewModel)
+                signInWithCredential(task, viewModel)
             }
         }
     }
@@ -68,12 +68,13 @@ fun MyPageScreen(
     }
 }
 
-private fun handleGoogleLoginResult(
+private fun signInWithCredential(
     accountTask: Task<GoogleSignInAccount>,
     viewModel: MainViewModel
 ) {
     val account = accountTask.result ?: return
     val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
     Firebase.auth.signInWithCredential(credential)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -95,7 +96,10 @@ fun loginNaver(
     viewModel: MainViewModel,
 ) {
     val oauthLoginCallback = object : OAuthLoginCallback {
-        override fun onSuccess() { fetchNaverUserProfile(viewModel) }
+        override fun onSuccess() {
+            fetchNaverUserProfile(viewModel)
+        }
+
         override fun onFailure(httpStatus: Int, message: String) {}
         override fun onError(errorCode: Int, message: String) {}
     }
@@ -111,41 +115,7 @@ private fun fetchNaverUserProfile(viewModel: MainViewModel) {
 
             if (email.isEmpty() || uid.isEmpty()) return
 
-            Firebase.auth.createUserWithEmailAndPassword(email, uid)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        signInAccountInfo(
-                            viewModel = viewModel,
-                            task = task,
-                            email = email,
-                            type = AccountInfo.LoginType.NAVER
-                        )
-                    } else {
-                        viewModel.signOut()
-                        Firebase.auth.signOut()
-                    }
-                }
-                .addOnFailureListener {
-                    if (it is FirebaseAuthUserCollisionException) {
-                        Firebase.auth.signInWithEmailAndPassword(email, uid)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    signInAccountInfo(
-                                        viewModel = viewModel,
-                                        task = task,
-                                        email = email,
-                                        type = AccountInfo.LoginType.NAVER
-                                    )
-                                } else {
-                                    Log.e("FirebaseNaverLogin", "네이버계정으로 로그인 실패")
-                                    viewModel.signOut()
-                                    Firebase.auth.signOut()
-                                }
-                            }
-                    } else {
-                        Log.e("FirebaseNaverLogin", "네이버계정으로 회원가입 실패")
-                    }
-                }
+            createUserWithEmailAndPassword(viewModel, email, uid)
         }
 
         override fun onFailure(httpStatus: Int, message: String) {}
@@ -199,4 +169,54 @@ private fun fetchKakaoUserProfile() {
 
 private fun isLoginCancelled(error: Throwable): Boolean {
     return error is ClientError && error.reason == ClientErrorCause.Cancelled
+}
+
+private fun createUserWithEmailAndPassword(
+    viewModel: MainViewModel,
+    email: String,
+    uid: String
+) {
+    Firebase.auth.createUserWithEmailAndPassword(email, uid)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                signInAccountInfo(
+                    viewModel = viewModel,
+                    task = task,
+                    email = email,
+                    type = AccountInfo.LoginType.NAVER
+                )
+            } else {
+                viewModel.signOut()
+                Firebase.auth.signOut()
+            }
+        }
+        .addOnFailureListener {
+            if (it is FirebaseAuthUserCollisionException) {
+                signInWithEmailAndPassword(viewModel, email, uid)
+            } else {
+                Log.e("FirebaseNaverLogin", "네이버계정으로 회원가입 실패")
+            }
+        }
+}
+
+private fun signInWithEmailAndPassword(
+    viewModel: MainViewModel,
+    email: String,
+    uid: String
+) {
+    Firebase.auth.signInWithEmailAndPassword(email, uid)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                signInAccountInfo(
+                    viewModel = viewModel,
+                    task = task,
+                    email = email,
+                    type = AccountInfo.LoginType.NAVER
+                )
+            } else {
+                Log.e("FirebaseNaverLogin", "네이버계정으로 로그인 실패")
+                viewModel.signOut()
+                Firebase.auth.signOut()
+            }
+        }
 }
