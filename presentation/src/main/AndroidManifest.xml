@@ -14,7 +14,7 @@
 
                 <!-- TODO scheme 변경 -->
                 <data android:host="oauth"
-                    android:scheme="kakaoe11e656c76d3f47caa555a42c3f5dd87" />
+                    android:scheme="kakao344bcdce226b80d4b18edcd9fcc32adf" />
             </intent-filter>
         </activity>
     </application>
