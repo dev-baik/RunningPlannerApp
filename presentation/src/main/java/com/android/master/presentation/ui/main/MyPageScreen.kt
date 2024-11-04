@@ -9,12 +9,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import com.android.master.domain.model.AccountInfo
 import com.android.master.presentation.viewmodel.MainViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
@@ -30,17 +36,20 @@ fun MyPageScreen(
     viewModel: MainViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
+    val accountInfo by viewModel.accountInfo.collectAsState()
+    Log.i("AccountInfo", accountInfo.toString())
+
     val context = LocalContext.current
     val kakaoClient = UserApiClient.instance
     val googleLoginForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val task: Task<GoogleSignInAccount> =
-                GoogleSignIn.getSignedInAccountFromIntent(result.data)
-
-            val account = task.result
-            Log.i("GoogleLogin", account.idToken.toString())
+            result.data?.let {
+                val task: Task<GoogleSignInAccount> =
+                    GoogleSignIn.getSignedInAccountFromIntent(it)
+                handleGoogleLoginResult(task, viewModel)
+            }
         } else {
             Log.e("GoogleLogin", result.toString())
         }
@@ -57,6 +66,29 @@ fun MyPageScreen(
             Text("구글 로그인")
         }
     }
+}
+
+private fun handleGoogleLoginResult(
+    accountTask: Task<GoogleSignInAccount>,
+    viewModel: MainViewModel
+) {
+    val account = accountTask.result ?: return
+    val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+    Firebase.auth.signInWithCredential(credential)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                viewModel.signIn(
+                    AccountInfo(
+                        accountId = task.result.user?.uid,
+                        email = account.email,
+                        type = AccountInfo.LoginType.GOOGLE
+                    )
+                )
+            } else {
+                viewModel.signOut()
+                Firebase.auth.signOut()
+            }
+        }
 }
 
 fun loginNaver(context: Context) {
