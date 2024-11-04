@@ -1,56 +1,34 @@
 package com.android.master.presentation.ui.main
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
-import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import com.android.master.presentation.viewmodel.MainViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.tasks.Task
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.common.model.ClientError
+import com.kakao.sdk.common.model.ClientErrorCause
+import com.kakao.sdk.user.UserApiClient
+import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.OAuthLoginCallback
 
 @Composable
 fun MyPageScreen(
     viewModel: MainViewModel,
     googleSignInClient: GoogleSignInClient
 ) {
-    val focusRequester = remember { FocusRequester() }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by remember { mutableStateOf(value = "") }
-    var showPassword by remember { mutableStateOf(value = false) }
-    var isError by rememberSaveable { mutableStateOf(false) }
-
+    val context = LocalContext.current
+    val kakaoClient = UserApiClient.instance
     val googleLoginForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -66,114 +44,54 @@ fun MyPageScreen(
     }
 
     Column {
-        EmailInputTextField(
-            email = email,
-            onEmailChange = {
-                email = it
-                isError = false
-            },
-            isError = isError,
-            onDone = {
-                if (!isEmailValid(email)) {
-                    isError = true
-                } else {
-                    focusRequester.requestFocus()
-                }
-            }
-        )
-        PasswordInputField(
-            password = password,
-            onPasswordChange = { password = it },
-            showPassword = showPassword,
-            onTogglePasswordVisibility = { showPassword = !showPassword },
-            focusRequester = focusRequester
-        )
-
-        Spacer(Modifier.size(50.dp))
-
+        Button(onClick = { kakaoClient.loginKakao(context) }) {
+            Text("카카오 로그인")
+        }
+        Button(onClick = { loginNaver(context) }) {
+            Text("네이버 로그인")
+        }
         Button(onClick = { googleLoginForResult.launch(googleSignInClient.signInIntent) }) {
             Text("구글 로그인")
         }
     }
 }
 
-@Composable
-private fun EmailInputTextField(
-    email: String,
-    onEmailChange: (String) -> Unit,
-    isError: Boolean,
-    onDone: () -> Unit
-) {
-    OutlinedTextField(
-        value = email,
-        label = { Text("이메일") },
-        onValueChange = onEmailChange,
-        trailingIcon = {
-            if (isError) {
-                Icon(
-                    imageVector = Icons.Filled.Error,
-                    contentDescription = "error",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-        singleLine = true,
-        isError = isError,
-        keyboardActions = KeyboardActions(onDone = { onDone() }),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email
-        )
-    )
-    if (isError) {
-        Text(
-            text = "유효하지 않은 이메일 형식입니다.",
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(start = 16.dp)
-        )
+fun loginNaver(context: Context) {
+    val oauthLoginCallback = object : OAuthLoginCallback {
+        override fun onSuccess() {
+            Log.i("NaverLogin", NaverIdLoginSDK.getAccessToken().toString())
+        }
+
+        override fun onFailure(httpStatus: Int, message: String) {
+            val errorCode = NaverIdLoginSDK.getLastErrorCode().code
+            val errorDescription = NaverIdLoginSDK.getLastErrorDescription()
+            Log.e("NaverLogin", "errorCode:$errorCode, errorDesc:$errorDescription")
+        }
+
+        override fun onError(errorCode: Int, message: String) {
+            onFailure(errorCode, message)
+        }
+    }
+
+    NaverIdLoginSDK.authenticate(context, oauthLoginCallback)
+}
+
+private fun UserApiClient.loginKakao(context: Context) {
+    if (isKakaoTalkLoginAvailable(context)) {
+        loginWithKakaoTalk(context) { token, error -> handleKakaoLoginResult(token, error) }
+    } else {
+        loginWithKakaoAccount(context) { token, error -> handleKakaoLoginResult(token, error) }
     }
 }
 
-@Composable
-private fun PasswordInputField(
-    password: String,
-    onPasswordChange: (String) -> Unit,
-    showPassword: Boolean,
-    onTogglePasswordVisibility: () -> Unit,
-    focusRequester: FocusRequester
-) {
-    OutlinedTextField(
-        value = password,
-        label = { Text("비밀번호") },
-        onValueChange = onPasswordChange,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        visualTransformation = if (showPassword) {
-            VisualTransformation.None
-        } else {
-            PasswordVisualTransformation()
-        },
-        trailingIcon = {
-            if (showPassword) {
-                IconButton(onClick = onTogglePasswordVisibility) {
-                    Icon(
-                        imageVector = Icons.Filled.Visibility,
-                        contentDescription = "hide_password"
-                    )
-                }
-            } else {
-                IconButton(onClick = onTogglePasswordVisibility) {
-                    Icon(
-                        imageVector = Icons.Filled.VisibilityOff,
-                        contentDescription = "hide_password"
-                    )
-                }
-            }
-        },
-        singleLine = true,
-        modifier = Modifier.focusRequester(focusRequester)
-    )
+private fun handleKakaoLoginResult(token: OAuthToken?, error: Throwable?) {
+    when {
+        error != null && isLoginCancelled(error) -> return
+        error != null -> Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
+        token != null -> Log.i("KakaoLogin", "카카오계정으로 로그인 성공 ${token.accessToken}")
+    }
 }
 
-fun isEmailValid(email: String): Boolean {
-    return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+private fun isLoginCancelled(error: Throwable): Boolean {
+    return error is ClientError && error.reason == ClientErrorCause.Cancelled
 }
