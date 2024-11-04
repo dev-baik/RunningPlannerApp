@@ -85,10 +85,23 @@ private fun UserApiClient.loginKakao(context: Context) {
 }
 
 private fun handleKakaoLoginResult(token: OAuthToken?, error: Throwable?) {
-    when {
-        error != null && isLoginCancelled(error) -> return
-        error != null -> Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
-        token != null -> Log.i("KakaoLogin", "카카오계정으로 로그인 성공 ${token.accessToken}")
+    if (error != null) {
+        if (isLoginCancelled(error)) return
+        Log.e("KakaoLogin", "카카오계정으로 로그인 실패", error)
+        return
+    }
+    token?.let { fetchUserProfile() }
+}
+
+private fun fetchUserProfile() {
+    UserApiClient.instance.me { user, error ->
+        if (error != null) {
+            Log.e("KakaoProfile", "사용자 정보 가져오기 실패", error)
+        } else {
+            user?.let {
+                Log.i("KakaoPrifle", "${it.id} ${it.kakaoAccount?.email}")
+            }
+        }
     }
 }
 
