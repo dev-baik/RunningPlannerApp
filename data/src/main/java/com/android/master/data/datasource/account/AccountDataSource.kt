@@ -1,9 +1,9 @@
-package com.android.master.domain.repository
+package com.android.master.data.datasource.account
 
 import com.android.master.domain.model.AccountInfo
 import kotlinx.coroutines.flow.StateFlow
 
-interface AccountRepository {
+interface AccountDataSource {
 
     val accountInfo: StateFlow<AccountInfo?>
 

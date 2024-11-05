@@ -324,7 +324,7 @@ private fun saveAccountInfo(
 ) {
     viewModel.signIn(
         AccountInfo(
-            accountId = task.result.user?.uid,
+            id = task.result.user?.uid,
             email = email,
             type = type
         )
