@@ -11,7 +11,7 @@ class AccountUseCase @Inject constructor(
 ) {
 
     fun getAccountInfo(): StateFlow<AccountInfo?> {
-        return accountRepository.accountInfo
+        return accountRepository.getAccountInfo()
     }
 
     suspend fun signIn(accountInfo: AccountInfo) {

@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface AccountRepository {
 
-    val accountInfo: StateFlow<AccountInfo?>
+    fun getAccountInfo(): StateFlow<AccountInfo?>
 
     suspend fun saveAccountInfo(accountInfo: AccountInfo)
 

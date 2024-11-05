@@ -10,7 +10,9 @@ class AccountRepositoryImpl @Inject constructor(
     private val dataSource: AccountDataSource
 ) : AccountRepository {
 
-    override val accountInfo: StateFlow<AccountInfo?> = dataSource.accountInfo
+    override fun getAccountInfo(): StateFlow<AccountInfo?> {
+        return dataSource.getAccountInfo()
+    }
 
     override suspend fun saveAccountInfo(accountInfo: AccountInfo) {
         dataSource.saveAccountInfo(accountInfo)
