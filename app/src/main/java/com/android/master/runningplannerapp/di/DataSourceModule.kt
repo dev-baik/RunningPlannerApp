@@ -4,6 +4,8 @@ import com.android.master.data.datasource.account.AccountDataSource
 import com.android.master.data.datasource.account.AccountDataSourceImpl
 import com.android.master.data.datasource.mock.MockDataSource
 import com.android.master.data.datasource.mock.MockDataSourceImpl
+import com.android.master.data.datasource.video.VideoDataSource
+import com.android.master.data.datasource.video.VideoDataSourceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,4 +20,7 @@ interface DataSourceModule {
 
     @Binds
     fun bindAccountDataSource(accountDataSourceImpl: AccountDataSourceImpl): AccountDataSource
+
+    @Binds
+    fun bindVideoDataSource(videoDataSourceImpl: VideoDataSourceImpl): VideoDataSource
 }
