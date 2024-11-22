@@ -1,7 +1,7 @@
 package com.android.master.runningplannerapp.di
 
 import com.android.master.data.remote.MockApi
-import com.android.master.data.utils.Utils.MOCK_URL
+import com.android.master.data.utils.Utils.BASE_URL
 import com.android.master.runningplannerapp.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -56,7 +56,7 @@ object NetworkModule {
         gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(MOCK_URL)
+            .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(gsonConverterFactory)
             .build()
