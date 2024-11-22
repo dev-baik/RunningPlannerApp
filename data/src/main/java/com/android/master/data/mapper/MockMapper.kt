@@ -12,7 +12,7 @@ object MockMapper {
                 MockItem(data = data.data)
             )
 
-            is ApiResult.Fail -> ApiResult.Fail(error)
+            is ApiResult.Error -> ApiResult.Error(exception)
         }
     }
 }
