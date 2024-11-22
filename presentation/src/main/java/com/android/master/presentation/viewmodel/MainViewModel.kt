@@ -7,6 +7,7 @@ import com.android.master.domain.model.AccountInfo
 import com.android.master.domain.model.TempItem
 import com.android.master.domain.usecase.auth.AccountUseCase
 import com.android.master.presentation.ui.Temp
+import com.android.master.presentation.ui.Video
 import com.android.master.presentation.utils.NavigationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -14,13 +15,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val accountUseCase: AccountUseCase
+    private val accountUseCase: AccountUseCase,
 ) : ViewModel() {
 
     val accountInfo = accountUseCase.getAccountInfo()
 
     fun openTemp(navHostController: NavHostController, tempItem: TempItem) {
         NavigationUtils.navigate(navHostController, Temp.navigateWithArg(tempItem))
+    }
+
+    fun openVideo(navHostController: NavHostController) {
+        NavigationUtils.navigate(navHostController, Video.route)
     }
 
     fun signIn(accountInfo: AccountInfo) {

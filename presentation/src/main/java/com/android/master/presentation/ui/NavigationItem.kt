@@ -16,10 +16,12 @@ import com.android.master.presentation.ui.NavigationRouteName.MAIN_MY_PAGE
 import com.android.master.presentation.utils.GsonUtils
 
 sealed class NavigationItem(open val route: String) {
-    sealed class MainNav(override val route: String, val icon: ImageVector, val title: String) : NavigationItem(route) {
+    sealed class MainNav(override val route: String, val icon: ImageVector, val title: String) :
+        NavigationItem(route) {
         object Home : MainNav(MAIN_HOME, Icons.Default.Home, NavigationTitle.MAIN_HOME)
         object Diary : MainNav(MAIN_DIARY, Icons.Default.DateRange, NavigationTitle.MAIN_DIARY)
-        object MyPage : MainNav(MAIN_MY_PAGE, Icons.Default.AccountCircle, NavigationTitle.MAIN_MY_PAGE)
+        object MyPage :
+            MainNav(MAIN_MY_PAGE, Icons.Default.AccountCircle, NavigationTitle.MAIN_MY_PAGE)
 
         companion object {
             fun isMainRoute(route: String?): Boolean {
@@ -52,6 +54,11 @@ object Temp : DestinationArg<TempItem> {
     }
 }
 
+object Video : Destination {
+    override val route: String = NavigationRouteName.VIDEO
+    override val title: String = NavigationTitle.VIDEO
+}
+
 interface Destination {
     val route: String
     val title: String
@@ -71,6 +78,7 @@ object NavigationRouteName {
     const val MAIN_DIARY = "main_diary"
     const val MAIN_MY_PAGE = "main_my_page"
     const val TEMP = "temp"
+    const val VIDEO = "video"
 }
 
 object NavigationTitle {
@@ -78,4 +86,5 @@ object NavigationTitle {
     const val MAIN_DIARY = "다이어리"
     const val MAIN_MY_PAGE = "마이페이지"
     const val TEMP = "임시"
+    const val VIDEO = "비디오"
 }
