@@ -4,4 +4,9 @@
     <!-- MyPage -->
     <string name="login_failed_message">로그인에 실패하셨습니다</string>
     <string name="login_success_message">로그인에 성공하셨습니다</string>
+
+    <!-- Video -->
+    <string name="video_search_not_found">‘%s’에 대한 검색 결과가 없습니다.</string>
+    <string name="network_connect_error">Wi-Fi나 셀룰러 데이터 연결 상태를\n확인하고 다시 시도해주세요.</string>
+    <string name="retry">재시도</string>
 </resources>
