@@ -12,8 +12,8 @@ abstract class BaseRepository {
             response = callFunction()
         } catch (exception: Exception) {
             return when (exception) {
-                is IOException -> ApiResult.Fail(Throwable("Internet error runs"))
-                else -> ApiResult.Fail(Throwable(exception))
+                is IOException -> ApiResult.Error(Exception("Internet error runs"))
+                else -> ApiResult.Error(Exception(exception))
             }
         }
 
@@ -22,7 +22,7 @@ abstract class BaseRepository {
             ApiResult.Success(body)
         } else {
             val errorMessage = response.errorBody()?.string() ?: response.message()
-            ApiResult.Fail(Throwable(errorMessage))
+            ApiResult.Error(Exception(errorMessage))
         }
     }
 }

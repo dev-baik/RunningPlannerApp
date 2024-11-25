@@ -17,6 +17,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         buildConfigField("String", "URL", getApi("URL"))
+        buildConfigField("String", "PIXABAY_API_KEY", getApi("PIXABAY_API_KEY"))
     }
 
     buildTypes {

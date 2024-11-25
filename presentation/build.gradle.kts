@@ -97,6 +97,9 @@ dependencies {
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
+
+    // glide
+    implementation(libs.glide)
 }
 
 fun getProperty(propertyKey: String): String {

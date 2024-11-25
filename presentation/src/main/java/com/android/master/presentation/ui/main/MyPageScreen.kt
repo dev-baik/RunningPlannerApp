@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.getString
 import com.android.master.domain.model.AccountInfo
 import com.android.master.presentation.R
@@ -41,6 +40,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyPageScreen(
+    context: Context,
     viewModel: MainViewModel,
     googleSignInClient: GoogleSignInClient,
     scaffoldState: SnackbarHostState
@@ -50,7 +50,6 @@ fun MyPageScreen(
 
     val scope = rememberCoroutineScope()
 
-    val context = LocalContext.current
     val googleLoginForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
