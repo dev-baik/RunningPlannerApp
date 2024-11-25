@@ -36,7 +36,9 @@ class VideoViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    var isPrevPageAvailable: Boolean = false
+    private val _isPrevPageAvailable = MutableStateFlow(false)
+    val isPrevPageAvailable: StateFlow<Boolean> = _isPrevPageAvailable.asStateFlow()
+
     private var prevKeyword: String = ""
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,15 +60,15 @@ class VideoViewModel @Inject constructor(
                         }
                         val updatedItems = (currentItems + apiResult.data.videoItemList).distinctBy { it.id }
                         prevKeyword = keyword
-                        isPrevPageAvailable = true
+                        _isPrevPageAvailable.value = true
                         VideoSearchResponseModel.Success(updatedItems)
                     }
 
                     // 다음 페이지가 없는 경우, 네트워크 연결 오류
                     is ApiResult.Error -> {
                         // 다음 페이지가 없는 경우, 현재 키워드에 대한 기존 videoItemList 를 전달
-                        if (isPrevPageAvailable && prevKeyword == keyword) {
-                            isPrevPageAvailable = false // 다음 페이지가 재호출되는 경우를 방지
+                        if (isPrevPageAvailable.value && prevKeyword == keyword) {
+                            _isPrevPageAvailable.value = false // 다음 페이지가 재호출되는 경우를 방지
                             VideoSearchResponseModel.Success((videoUiState.value as VideoUiModel.VideoList).videoItem.videoItemList)
                         } else {
                             VideoSearchResponseModel.Error(apiResult.exception.message.toString())

@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -96,7 +97,10 @@ fun VideoScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val uiState = viewModel.videoUiState.collectAsStateWithLifecycle().value
 
-    videoListState.OnBottomReached(viewModel.isPrevPageAvailable) {
+    val isPrevPageAvailable by viewModel.isPrevPageAvailable.collectAsStateWithLifecycle()
+    val updatedIsPrevAvailable = rememberUpdatedState(isPrevPageAvailable).value
+
+    videoListState.OnBottomReached(updatedIsPrevAvailable) {
         viewModel.getNextPage()
     }
 
