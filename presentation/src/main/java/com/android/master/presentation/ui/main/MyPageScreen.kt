@@ -10,10 +10,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat.getString
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.master.domain.model.AccountInfo
 import com.android.master.presentation.R
 import com.android.master.presentation.viewmodel.MainViewModel
@@ -45,7 +45,7 @@ fun MyPageScreen(
     googleSignInClient: GoogleSignInClient,
     scaffoldState: SnackbarHostState
 ) {
-    val accountInfo by viewModel.accountInfo.collectAsState()
+    val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     Log.i("AccountInfo", accountInfo.toString())
 
     val scope = rememberCoroutineScope()
@@ -323,7 +323,7 @@ private fun saveAccountInfo(
 ) {
     viewModel.signIn(
         AccountInfo(
-            id = task.result.user?.uid,
+            id = task.result.user?.uid.orEmpty(),
             email = email,
             type = type
         )
