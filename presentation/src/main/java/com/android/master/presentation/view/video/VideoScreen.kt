@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui.video
+package com.android.master.presentation.view.video
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -50,8 +50,8 @@ import androidx.navigation.NavHostController
 import com.android.master.domain.model.VideoSearchItem
 import com.android.master.presentation.R
 import com.android.master.presentation.model.VideoUiModel
-import com.android.master.presentation.ui.NavigationItem.MainNav.Home
-import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
+import com.android.master.presentation.view.NavigationItem.MainNav.Home
+import com.android.master.presentation.view.theme.RunningPlannerAppTheme
 import com.android.master.presentation.utils.isNetworkAvailable
 import com.android.master.presentation.viewmodel.VideoViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi

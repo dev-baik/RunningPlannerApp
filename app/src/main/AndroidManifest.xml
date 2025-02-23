@@ -17,7 +17,7 @@
         android:theme="@style/Theme.RunningPlannerApp"
         tools:targetApi="31">
         <activity
-            android:name="com.android.master.presentation.ui.MainActivity"
+            android:name="com.android.master.presentation.view.main.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.RunningPlannerApp">
             <intent-filter>

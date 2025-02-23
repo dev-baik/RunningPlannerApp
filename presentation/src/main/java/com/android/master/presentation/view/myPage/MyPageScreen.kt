@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui.main
+package com.android.master.presentation.view.myPage
 
 import android.app.Activity
 import android.content.Context

@@ -8,8 +8,8 @@ import com.android.master.domain.model.TempItem
 import com.android.master.domain.usecase.auth.GetAccountInfoUseCase
 import com.android.master.domain.usecase.auth.LoginUseCase
 import com.android.master.domain.usecase.auth.LogoutUseCase
-import com.android.master.presentation.ui.Temp
-import com.android.master.presentation.ui.Video
+import com.android.master.presentation.view.Temp
+import com.android.master.presentation.view.Video
 import com.android.master.presentation.utils.NavigationUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui.main
+package com.android.master.presentation.view.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button

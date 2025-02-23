@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui
+package com.android.master.presentation.view.main
 
 import android.content.Context
 import androidx.compose.foundation.layout.padding
@@ -27,11 +27,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.android.master.presentation.ui.main.DiaryScreen
-import com.android.master.presentation.ui.main.HomeScreen
-import com.android.master.presentation.ui.main.MyPageScreen
-import com.android.master.presentation.ui.temp.TempScreen
-import com.android.master.presentation.ui.video.VideoScreen
+import com.android.master.presentation.view.NavigationItem
+import com.android.master.presentation.view.NavigationRouteName
+import com.android.master.presentation.view.Temp
+import com.android.master.presentation.view.diary.DiaryScreen
+import com.android.master.presentation.view.home.HomeScreen
+import com.android.master.presentation.view.myPage.MyPageScreen
+import com.android.master.presentation.view.temp.TempScreen
+import com.android.master.presentation.view.video.VideoScreen
 import com.android.master.presentation.utils.NavigationUtils
 import com.android.master.presentation.viewmodel.MainViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
