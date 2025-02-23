@@ -13,10 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.ContextCompat.getString
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.master.domain.model.AccountInfo
 import com.android.master.presentation.R
-import com.android.master.presentation.viewmodel.MainViewModel
+import com.android.master.presentation.viewmodel.MyPageViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -41,10 +42,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyPageScreen(
     context: Context,
-    viewModel: MainViewModel,
     googleSignInClient: GoogleSignInClient,
     scaffoldState: SnackbarHostState
 ) {
+    val viewModel = hiltViewModel<MyPageViewModel>()
+
     val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
     Log.i("AccountInfo", accountInfo.toString())
 
@@ -85,7 +87,7 @@ fun LoginButton(text: String, onClick: () -> Unit) {
 private fun signInWithCredential(
     context: Context,
     accountTask: Task<GoogleSignInAccount>,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     scope: CoroutineScope,
     scaffoldState: SnackbarHostState
 ) {
@@ -120,7 +122,7 @@ private fun signInWithCredential(
 
 fun loginNaver(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     scope: CoroutineScope,
     scaffoldState: SnackbarHostState
 ) {
@@ -138,7 +140,7 @@ fun loginNaver(
 
 private fun fetchNaverUserProfile(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     scope: CoroutineScope,
     scaffoldState: SnackbarHostState
 ) {
@@ -164,7 +166,7 @@ private fun fetchNaverUserProfile(
 
 private fun UserApiClient.loginKakao(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     scope: CoroutineScope,
     scaffoldState: SnackbarHostState
 ) {
@@ -181,7 +183,7 @@ private fun UserApiClient.loginKakao(
 
 private fun handleKakaoLoginResult(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     token: OAuthToken?,
     error: Throwable?,
     scope: CoroutineScope,
@@ -201,7 +203,7 @@ private fun handleKakaoLoginResult(
 
 private fun fetchKakaoUserProfile(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     scope: CoroutineScope,
     scaffoldState: SnackbarHostState
 ) {
@@ -234,7 +236,7 @@ private fun isLoginCancelled(error: Throwable): Boolean {
 
 private fun createUserWithEmailAndPassword(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     email: String,
     uid: String,
     scope: CoroutineScope,
@@ -282,7 +284,7 @@ private fun createUserWithEmailAndPassword(
 
 private fun signInWithEmailAndPassword(
     context: Context,
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     email: String,
     uid: String,
     scope: CoroutineScope,
@@ -316,7 +318,7 @@ private fun signInWithEmailAndPassword(
 }
 
 private fun saveAccountInfo(
-    viewModel: MainViewModel,
+    viewModel: MyPageViewModel,
     task: Task<AuthResult>,
     email: String,
     type: AccountInfo.LoginType

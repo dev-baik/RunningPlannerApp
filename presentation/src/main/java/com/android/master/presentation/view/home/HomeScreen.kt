@@ -4,15 +4,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.android.master.domain.model.TempItem
-import com.android.master.presentation.viewmodel.MainViewModel
+import com.android.master.presentation.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: MainViewModel,
     navController: NavHostController
 ) {
+    val viewModel = hiltViewModel<HomeViewModel>()
+
     Column {
         Button(onClick = { viewModel.openTemp(navController, TempItem("Temp")) }) {
             Text(text = "Temp")
