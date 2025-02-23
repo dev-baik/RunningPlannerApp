@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui
+package com.android.master.presentation.view
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -10,9 +10,9 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.android.master.domain.model.TempItem
-import com.android.master.presentation.ui.NavigationRouteName.MAIN_DIARY
-import com.android.master.presentation.ui.NavigationRouteName.MAIN_HOME
-import com.android.master.presentation.ui.NavigationRouteName.MAIN_MY_PAGE
+import com.android.master.presentation.view.NavigationRouteName.MAIN_DIARY
+import com.android.master.presentation.view.NavigationRouteName.MAIN_HOME
+import com.android.master.presentation.view.NavigationRouteName.MAIN_MY_PAGE
 import com.android.master.presentation.utils.GsonUtils
 
 sealed class NavigationItem(open val route: String) {

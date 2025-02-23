@@ -1,6 +1,5 @@
-package com.android.master.presentation.ui.video
+package com.android.master.presentation.view.video
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +37,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -49,10 +49,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.android.master.domain.model.VideoSearchItem
 import com.android.master.presentation.R
-import com.android.master.presentation.model.VideoUiModel
-import com.android.master.presentation.ui.NavigationItem.MainNav.Home
-import com.android.master.presentation.ui.theme.RunningPlannerAppTheme
+import com.android.master.presentation.intent.VideoIntent
+import com.android.master.presentation.state.VideoViewState
 import com.android.master.presentation.utils.isNetworkAvailable
+import com.android.master.presentation.view.NavigationItem.MainNav.Home
+import com.android.master.presentation.view.theme.RunningPlannerAppTheme
 import com.android.master.presentation.viewmodel.VideoViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -70,14 +71,6 @@ fun SearchTextFieldPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun LoadingProgressPreview() {
-    RunningPlannerAppTheme {
-        LoadingProgress(true)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
 fun RetryBoxPreview() {
     RunningPlannerAppTheme {
         RetryBox { }
@@ -86,82 +79,93 @@ fun RetryBoxPreview() {
 
 @Composable
 fun VideoScreen(
-    context: Context,
     navController: NavHostController
 ) {
     val viewModel = hiltViewModel<VideoViewModel>()
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     val videoListState = rememberLazyStaggeredGridState()
 
     var searchText by remember { mutableStateOf("") }
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val uiState = viewModel.videoUiState.collectAsStateWithLifecycle().value
+    val viewState by viewModel.state.collectAsStateWithLifecycle()
 
-    val isPrevPageAvailable by viewModel.isPrevPageAvailable.collectAsStateWithLifecycle()
-    val updatedIsPrevAvailable = rememberUpdatedState(isPrevPageAvailable).value
+    val isPrevPageAvailable by rememberUpdatedState(
+        (viewState as? VideoViewState.Success)?.isPrevPageAvailable ?: false
+    )
 
-    videoListState.OnBottomReached(updatedIsPrevAvailable) {
-        viewModel.getNextPage()
+    videoListState.OnBottomReached(isPrevPageAvailable) {
+        viewModel.sendIntent(VideoIntent.LoadNextPage)
     }
 
     Column {
-        when (uiState) {
-            is VideoUiModel.VideoList -> {
-                SearchTextField(searchText) {
-                    viewModel.updateKeyword(it)
-                    coroutineScope.launch { videoListState.scrollToItem(0) }
-                    searchText = it
+        SearchTextField(searchText) {
+            viewModel.sendIntent(VideoIntent.UpdateKeyword(it))
+            scope.launch { videoListState.scrollToItem(0) }
+            searchText = it
+        }
+
+        Spacer(Modifier.size(8.dp))
+
+        when (viewState) {
+            is VideoViewState.Loading -> {
+                val loadingState = viewState as VideoViewState.Loading
+                if (loadingState.previousItems.isNotEmpty()) {
+                    VideoVerticalGrid(
+                        videoListState = videoListState,
+                        videoItem = VideoSearchItem(loadingState.previousItems)
+                    )
                 }
-                Spacer(Modifier.size(8.dp))
-                VideoVerticalGrid(
-                    context = context,
-                    videoListState = videoListState,
-                    videoItem = uiState.videoItem,
-                )
-                LoadingProgress(isLoading)
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(75.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(35.dp))
+                }
             }
 
-            is VideoUiModel.VideoNotFound -> {
-                SearchTextField(searchText) {
-                    viewModel.updateKeyword(it)
-                    coroutineScope.launch {
-                        videoListState.scrollToItem(0)
-                    }
-                    searchText = it
-                }
+            is VideoViewState.Success -> {
+                val successState = viewState as VideoViewState.Success
+                VideoVerticalGrid(
+                    videoListState = videoListState,
+                    videoItem = VideoSearchItem(successState.videoItems)
+                )
+            }
 
+            is VideoViewState.NotFound -> {
+                val notFoundState = viewState as VideoViewState.NotFound
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
-                    Text(stringResource(R.string.video_search_not_found, uiState.keyword))
+                    Text(stringResource(R.string.video_search_not_found, notFoundState.keyword))
                 }
-
-                LoadingProgress(isLoading)
             }
 
-            is VideoUiModel.Error -> {
-                if (context.isNetworkAvailable()) {
-                    RetryBox { viewModel.updateKeyword(null) }
+            is VideoViewState.Error -> {
+                if (LocalContext.current.isNetworkAvailable()) {
+                    RetryBox { viewModel.sendIntent(VideoIntent.Retry) }
                 } else {
                     navController.popBackStack(Home.route, false)
                 }
             }
-        }
 
+            is VideoViewState.Idle -> {}
+        }
     }
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 private fun ColumnScope.VideoVerticalGrid(
-    context: Context,
     videoListState: LazyStaggeredGridState,
     videoItem: VideoSearchItem,
 ) {
-    val deviceWidth = remember { context.resources.displayMetrics.widthPixels }
+    val deviceWidth = LocalContext.current.resources.displayMetrics.widthPixels
 
     LazyVerticalStaggeredGrid(
         modifier = Modifier.weight(1f),
@@ -190,7 +194,9 @@ private fun ColumnScope.VideoVerticalGrid(
 }
 
 @Composable
-fun RetryBox(onRetry: () -> Unit) {
+fun RetryBox(
+    onRetry: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -203,23 +209,6 @@ fun RetryBox(onRetry: () -> Unit) {
 
         Button(onClick = onRetry) {
             Text(stringResource(R.string.retry))
-        }
-    }
-}
-
-
-@Composable
-fun LoadingProgress(isLoading: Boolean) {
-    if (isLoading) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(75.dp)
-
-        ) {
-            CircularProgressIndicator(modifier = Modifier.size(35.dp))
         }
     }
 }

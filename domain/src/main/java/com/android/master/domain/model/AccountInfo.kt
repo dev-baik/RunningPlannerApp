@@ -1,8 +1,8 @@
 package com.android.master.domain.model
 
 data class AccountInfo(
-    val id: String? = null,
-    val email: String? = null,
+    val id: String,
+    val email: String,
     val type: LoginType? = null
 ) {
     enum class LoginType {

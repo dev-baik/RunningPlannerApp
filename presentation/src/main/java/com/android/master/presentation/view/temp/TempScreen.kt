@@ -1,4 +1,4 @@
-package com.android.master.presentation.ui.temp
+package com.android.master.presentation.view.temp
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

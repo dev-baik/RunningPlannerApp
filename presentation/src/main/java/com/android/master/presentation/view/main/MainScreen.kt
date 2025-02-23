@@ -1,6 +1,5 @@
-package com.android.master.presentation.ui
+package com.android.master.presentation.view.main
 
-import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,34 +17,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.android.master.presentation.ui.main.DiaryScreen
-import com.android.master.presentation.ui.main.HomeScreen
-import com.android.master.presentation.ui.main.MyPageScreen
-import com.android.master.presentation.ui.temp.TempScreen
-import com.android.master.presentation.ui.video.VideoScreen
 import com.android.master.presentation.utils.NavigationUtils
-import com.android.master.presentation.viewmodel.MainViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.android.master.presentation.view.NavigationItem
+import com.android.master.presentation.view.NavigationRouteName
+import com.android.master.presentation.view.Temp
+import com.android.master.presentation.view.diary.DiaryScreen
+import com.android.master.presentation.view.home.HomeScreen
+import com.android.master.presentation.view.myPage.MyPageScreen
+import com.android.master.presentation.view.temp.TempScreen
+import com.android.master.presentation.view.video.VideoScreen
 
 @Composable
-fun MainScreen(googleSignInClient: GoogleSignInClient) {
-    val mainViewModel = hiltViewModel<MainViewModel>()
+fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
     val scaffoldState = remember { SnackbarHostState() }
 
-    val context = LocalContext.current
 
     Scaffold(
         snackbarHost = {
@@ -63,10 +59,7 @@ fun MainScreen(googleSignInClient: GoogleSignInClient) {
         }
     ) { paddingValues ->
         MainNavigationScreen(
-            context = context,
-            googleSignInClient = googleSignInClient,
             modifier = Modifier.padding(paddingValues),
-            viewModel = mainViewModel,
             scaffoldState = scaffoldState,
             navController = navController,
         )
@@ -122,10 +115,7 @@ fun MainBottomNavigationBar(
 
 @Composable
 fun MainNavigationScreen(
-    context: Context,
-    googleSignInClient: GoogleSignInClient,
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel,
     scaffoldState: SnackbarHostState,
     navController: NavHostController,
 ) {
@@ -135,16 +125,16 @@ fun MainNavigationScreen(
         modifier = modifier
     ) {
         composable(NavigationRouteName.MAIN_HOME) {
-            HomeScreen(viewModel, navController)
+            HomeScreen(navController)
         }
         composable(NavigationRouteName.MAIN_DIARY) {
-            DiaryScreen(viewModel)
+            DiaryScreen()
         }
         composable(NavigationRouteName.MAIN_MY_PAGE) {
-            MyPageScreen(context, viewModel, googleSignInClient, scaffoldState)
+            MyPageScreen(scaffoldState)
         }
         composable(NavigationRouteName.VIDEO) {
-            VideoScreen(context, navController)
+            VideoScreen(navController)
         }
         composable(
             route = Temp.routeWithArgName(),
