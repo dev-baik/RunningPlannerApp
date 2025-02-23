@@ -4,23 +4,27 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.android.master.domain.model.TempItem
-import com.android.master.presentation.viewmodel.HomeViewModel
+import com.android.master.presentation.utils.NavigationUtils
+import com.android.master.presentation.view.Temp
+import com.android.master.presentation.view.Video
 
 @Composable
 fun HomeScreen(
     navController: NavHostController
 ) {
-    val viewModel = hiltViewModel<HomeViewModel>()
 
     Column {
-        Button(onClick = { viewModel.openTemp(navController, TempItem("Temp")) }) {
+        Button(onClick = {
+            NavigationUtils.navigate(
+                navController, Temp.navigateWithArg(TempItem("temp"))
+            )
+        }) {
             Text(text = "Temp")
         }
 
-        Button(onClick = { viewModel.openVideo(navController) }) {
+        Button(onClick = { NavigationUtils.navigate(navController, Video.route) }) {
             Text(text = "Video")
         }
     }
