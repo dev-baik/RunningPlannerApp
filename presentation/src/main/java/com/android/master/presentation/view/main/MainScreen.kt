@@ -142,7 +142,7 @@ fun MainNavigationScreen(
             MyPageScreen(context, googleSignInClient, scaffoldState)
         }
         composable(NavigationRouteName.VIDEO) {
-            VideoScreen(context, navController)
+            VideoScreen(navController)
         }
         composable(
             route = Temp.routeWithArgName(),

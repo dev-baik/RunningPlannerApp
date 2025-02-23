@@ -3,24 +3,18 @@ package com.android.master.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.master.domain.model.ApiResult
-import com.android.master.domain.model.VideoSearchItem
+import com.android.master.domain.model.VideoItem
 import com.android.master.domain.usecase.video.SearchVideoByKeywordUseCase
-import com.android.master.presentation.model.VideoSearchResponseModel
-import com.android.master.presentation.model.VideoUiModel
+import com.android.master.presentation.intent.VideoIntent
+import com.android.master.presentation.state.VideoViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,80 +22,102 @@ class VideoViewModel @Inject constructor(
     private val searchVideoUseCase: SearchVideoByKeywordUseCase
 ) : ViewModel() {
 
-    private val _page = MutableStateFlow(1)
+    private val channel = Channel<VideoIntent>()
 
-    // 네트워크 연결을 확인하기 위해 nullable 타입으로 설정
-    private val _keyword = MutableStateFlow<String?>(null)
+    private val _state = MutableStateFlow<VideoViewState>(VideoViewState.Idle)
+    val state: StateFlow<VideoViewState> = _state.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private var currentPage = 1
+    private var currentKeyword: String? = null
+    private var currentVideoItems: List<VideoItem> = emptyList()
+    private var isPrevPageAvailable: Boolean = false
 
-    private val _isPrevPageAvailable = MutableStateFlow(false)
-    val isPrevPageAvailable: StateFlow<Boolean> = _isPrevPageAvailable.asStateFlow()
-
-    private var prevKeyword: String = ""
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val videoSearchResponse: Flow<VideoSearchResponseModel> =
-        combine(_page, _keyword) { page, keyword ->
-            page to keyword
-        }.flatMapLatest { (page, keyword) ->
-            if (keyword == null) return@flatMapLatest flowOf(VideoSearchResponseModel.Success(emptyList()))
-
-            _isLoading.value = true
-
-            searchVideoUseCase(keyword, page).map { apiResult ->
-                when (apiResult) {
-                    is ApiResult.Success -> {
-                        val currentItems = if (page == 1) {
-                            emptyList()
-                        } else {
-                            (videoUiState.value as VideoUiModel.VideoList).videoItem.videoItemList
-                        }
-                        val updatedItems = (currentItems + apiResult.data.videoItemList).distinctBy { it.id }
-                        prevKeyword = keyword
-                        _isPrevPageAvailable.value = true
-                        VideoSearchResponseModel.Success(updatedItems)
-                    }
-
-                    // 다음 페이지가 없는 경우, 네트워크 연결 오류
-                    is ApiResult.Error -> {
-                        // 다음 페이지가 없는 경우, 현재 키워드에 대한 기존 videoItemList 를 전달
-                        if (isPrevPageAvailable.value && prevKeyword == keyword) {
-                            _isPrevPageAvailable.value = false // 다음 페이지가 재호출되는 경우를 방지
-                            VideoSearchResponseModel.Success((videoUiState.value as VideoUiModel.VideoList).videoItem.videoItemList)
-                        } else {
-                            VideoSearchResponseModel.Error(apiResult.exception.message.toString())
-                        }
-                    }
-                }
-            }.onCompletion { _isLoading.value = false }
-        }
-
-    val videoUiState: StateFlow<VideoUiModel> = videoSearchResponse.map { response ->
-        when (response) {
-            is VideoSearchResponseModel.Success -> {
-                if (_keyword.value != null && response.videoItem.isEmpty()) {
-                    VideoUiModel.VideoNotFound(_keyword.value!!)
-                } else {
-                    VideoUiModel.VideoList(VideoSearchItem(response.videoItem))
-                }
-            }
-
-            is VideoSearchResponseModel.Error -> VideoUiModel.Error(response.message)
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = VideoUiModel.VideoList(VideoSearchItem())
-    )
-
-    fun getNextPage() {
-        _page.update { it + 1 }
+    init {
+        handleIntents()
     }
 
-    fun updateKeyword(newKeyword: String?) {
-        _keyword.update { newKeyword }
-        _page.update { 1 }
+    fun sendIntent(intent: VideoIntent) {
+        viewModelScope.launch { channel.send(intent) }
+    }
+
+    private fun handleIntents() {
+        viewModelScope.launch {
+            channel.consumeAsFlow().collectLatest { intent ->
+                when (intent) {
+                    is VideoIntent.UpdateKeyword -> {
+                        currentPage = 1
+                        currentKeyword = intent.keyword
+                        currentVideoItems = emptyList()
+                        fetchVideos()
+                    }
+
+                    is VideoIntent.LoadNextPage -> {
+                        if (isPrevPageAvailable) {
+                            currentPage++
+                            fetchVideos()
+                        }
+                    }
+
+                    is VideoIntent.Retry -> {
+                        fetchVideos()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchVideos() {
+        val keyword = currentKeyword
+        if (keyword.isNullOrEmpty()) {
+            _state.value = VideoViewState.Idle
+            return
+        }
+
+        viewModelScope.launch {
+            _state.value = VideoViewState.Loading(
+                previousItems = if (currentPage == 1) emptyList() else currentVideoItems,
+                keyword = keyword
+            )
+
+            searchVideoUseCase(keyword, currentPage).collectLatest { apiResult ->
+                when (apiResult) {
+                    is ApiResult.Success -> {
+                        val newItems = apiResult.data.videoItemList
+                        val updatedItems = if (currentPage == 1) {
+                            newItems
+                        } else {
+                            (currentVideoItems + newItems).distinctBy { it.id }
+                        }
+                        currentVideoItems = updatedItems
+                        isPrevPageAvailable = true
+
+                        if (updatedItems.isEmpty() && currentPage == 1) {
+                            _state.value = VideoViewState.NotFound(keyword)
+                        } else {
+                            _state.value = VideoViewState.Success(
+                                videoItems = updatedItems,
+                                keyword = keyword,
+                                isPrevPageAvailable = isPrevPageAvailable
+                            )
+                        }
+                    }
+
+                    is ApiResult.Error -> {
+                        if (isPrevPageAvailable && currentKeyword == keyword && currentPage > 1) {
+                            isPrevPageAvailable = false
+                            _state.value = VideoViewState.Success(
+                                videoItems = currentVideoItems,
+                                keyword = keyword,
+                                isPrevPageAvailable = isPrevPageAvailable
+                            )
+                        } else {
+                            _state.value = VideoViewState.Error(
+                                message = apiResult.exception.message ?: "Unknown error"
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
