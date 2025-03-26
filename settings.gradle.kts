@@ -23,3 +23,4 @@ rootProject.name = "RunningPlannerApp"
 include(":app")
 include(":data")
 include(":domain")
+include(":presentation")
