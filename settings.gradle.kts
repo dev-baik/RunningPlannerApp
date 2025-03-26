@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "RunningPlannerApp"
 include(":app")
- 
+include(":data")
