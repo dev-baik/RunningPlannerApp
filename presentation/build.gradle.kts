@@ -66,4 +66,7 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    // timber - log
+    implementation(libs.timber)
 }
