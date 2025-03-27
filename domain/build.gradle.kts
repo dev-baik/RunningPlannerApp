@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    id("kotlin-kapt")
 }
 
 java {
@@ -8,4 +9,5 @@ java {
 }
 
 dependencies {
+    implementation(libs.javax.inject)
 }
