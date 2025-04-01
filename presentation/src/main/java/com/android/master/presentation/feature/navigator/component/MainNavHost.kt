@@ -11,6 +11,7 @@ import com.android.master.presentation.feature.diary.navigation.diaryNavGraph
 import com.android.master.presentation.feature.home.navigation.homeNavGraph
 import com.android.master.presentation.feature.mypage.navigation.myPageNavGraph
 import com.android.master.presentation.feature.navigator.MainNavigator
+import com.android.master.presentation.feature.signin.navigation.signInGraph
 import com.android.master.presentation.ui.theme.RPAppTheme
 
 @Composable
@@ -33,6 +34,11 @@ fun MainNavHost(
             diaryNavGraph(padding = padding)
 
             myPageNavGraph(padding = padding)
+
+            signInGraph(
+                padding = padding,
+                navigateToHome = navigator::navigateToHome
+            )
         }
     }
 }
