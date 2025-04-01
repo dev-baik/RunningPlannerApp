@@ -24,13 +24,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.android.master.presentation.R
 import com.android.master.presentation.ui.theme.Blue
+import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
 import com.android.master.presentation.ui.theme.White
 
 @Preview
 @Composable
 fun SplashScreenPreview() {
-    SplashScreen()
+    RPAPPTheme {
+        SplashScreen()
+    }
 }
 
 @Composable
