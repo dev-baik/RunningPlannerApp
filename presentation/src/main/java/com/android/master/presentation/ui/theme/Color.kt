@@ -44,7 +44,7 @@ data class RPAppColors(
 
     // GrayScale
     val gray100: Color,
-    val gary200: Color,
+    val gray200: Color,
     val gray300: Color,
     val gray400: Color,
     val gray500: Color,
@@ -71,7 +71,7 @@ val defaultRPAppColors = RPAppColors(
 
     // GrayScale
     gray100 = Gray100,
-    gary200 = Gray200,
+    gray200 = Gray200,
     gray300 = Gray300,
     gray400 = Gray400,
     gray500 = Gray500,

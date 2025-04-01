@@ -3,4 +3,9 @@
 
     <!-- Splash -->
     <string name="splash_title">Running Planner App</string>
+
+    <!-- MainNavigationBarItemType -->
+    <string name="main_navigation_bar_item_home">홈</string>
+    <string name="main_navigation_bar_item_diary">다이어리</string>
+    <string name="main_navigation_bar_item_my_page">마이페이지</string>
 </resources>

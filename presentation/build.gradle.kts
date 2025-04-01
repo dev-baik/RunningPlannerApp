@@ -69,4 +69,7 @@ dependencies {
 
     // timber - log
     implementation(libs.timber)
+
+    // navigation
+    implementation(libs.navigation.compose)
 }

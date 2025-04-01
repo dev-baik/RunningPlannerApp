@@ -1,7 +1,12 @@
 package com.android.master.presentation.feature.navigator
 
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.master.presentation.feature.navigator.component.MainBottomBar
+import com.android.master.presentation.feature.navigator.component.MainNavHost
+import com.android.master.presentation.type.MainNavigationBarItemType
 import com.android.master.presentation.ui.theme.RPAPPTheme
 
 @Preview(showBackground = true)
@@ -13,11 +18,34 @@ fun MainPreview() {
 }
 
 @Composable
-fun MainScreen() {
-    MainScreenContent()
+fun MainScreen(
+    navigator: MainNavigator = rememberMainNavigator()
+) {
+    MainScreenContent(
+        navigator = navigator
+    )
 }
 
 @Composable
-private fun MainScreenContent() {
-
+private fun MainScreenContent(
+    modifier: Modifier = Modifier,
+    navigator: MainNavigator
+) {
+    Scaffold(
+        modifier = modifier,
+        content = { padding ->
+            MainNavHost(
+                navigator = navigator,
+                padding = padding
+            )
+        },
+        bottomBar = {
+            MainBottomBar(
+                isVisible = navigator.showBottomBar(),
+                navigationBarItems = MainNavigationBarItemType.entries.toList(),
+                onNavigationBarItemSelected = { navigator.navigateMainNavigation(it) },
+                currentNavigationBarItem = navigator.currentMainNavigationBarItem
+            )
+        }
+    )
 }
