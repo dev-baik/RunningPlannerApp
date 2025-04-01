@@ -4,7 +4,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.android.master.presentation.feature.navigator.component.MainBottomBar
 import com.android.master.presentation.feature.navigator.component.MainNavHost
+import com.android.master.presentation.type.MainNavigationBarItemType
 import com.android.master.presentation.ui.theme.RPAPPTheme
 
 @Preview(showBackground = true)
@@ -38,7 +40,12 @@ private fun MainScreenContent(
             )
         },
         bottomBar = {
-
+            MainBottomBar(
+                isVisible = navigator.showBottomBar(),
+                navigationBarItems = MainNavigationBarItemType.entries.toList(),
+                onNavigationBarItemSelected = { navigator.navigateMainNavigation(it) },
+                currentNavigationBarItem = navigator.currentMainNavigationBarItem
+            )
         }
     )
 }
