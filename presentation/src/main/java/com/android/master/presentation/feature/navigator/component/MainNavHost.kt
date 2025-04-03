@@ -36,7 +36,6 @@ fun MainNavHost(
             myPageNavGraph(padding = padding)
 
             signInGraph(
-                padding = padding,
                 navigateToHome = navigator::navigateToHome
             )
         }
