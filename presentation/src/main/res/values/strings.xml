@@ -2,6 +2,7 @@
     <string name="app_name">presentation</string>
 
     <!-- Splash -->
+    <string name="splash_logo_description">로고 이미지 입니다.</string>
     <string name="splash_title">Running Planner App</string>
 
     <!-- MainNavigationBarItemType -->
