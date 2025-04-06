@@ -1,5 +1,6 @@
 package com.android.master.presentation.feature.signin
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,39 +16,91 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.master.presentation.R
+import com.android.master.presentation.ui.component.view.RPAppLoadingView
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
+import com.android.master.presentation.util.view.LoadState
+import com.kakao.sdk.auth.model.OAuthToken
+import com.kakao.sdk.user.UserApiClient
 
 @Preview(showBackground = true)
 @Composable
 fun SignInScreenPreview() {
     RPAPPTheme {
         SignInScreen(
-            navigateToHome = {}
+            onKakaoSignInClicked = {},
+            onNaverSignInClicked = {},
+            onGoogleSignInClicked = {}
         )
+    }
+}
+
+fun setLayoutLoginKakaoClickListener(
+    context: Context,
+    callback: (OAuthToken?, Throwable?) -> Unit
+) {
+    if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
+        UserApiClient.instance.loginWithKakaoTalk(context, callback = callback)
+    } else {
+        UserApiClient.instance.loginWithKakaoAccount(context, callback = callback)
     }
 }
 
 @Composable
 fun SignInRoute(
+    viewModel: SignInViewModel = hiltViewModel(),
+    navigateToOnboarding: () -> Unit,
     navigateToHome: () -> Unit
 ) {
-    SignInScreen(
-        navigateToHome = navigateToHome
-    )
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val callback: (OAuthToken?, Throwable?) -> Unit = { oAuthToken, throwable ->
+        if (throwable != null) {
+            // TODO SnackBar
+        } else if (oAuthToken != null) {
+            // TODO 카카오 유저 정보 가져오기
+        }
+    }
+
+    when (uiState.loadState) {
+        LoadState.Idle -> {
+            SignInScreen(
+                onKakaoSignInClicked = {
+                    setLayoutLoginKakaoClickListener(context = context, callback = callback)
+                },
+                onNaverSignInClicked = {},
+                onGoogleSignInClicked = {},
+            )
+        }
+
+        LoadState.Loading -> RPAppLoadingView()
+
+        // 기존 사용자
+        LoadState.Success -> navigateToHome()
+
+        // 새로운 사용자
+        LoadState.Error -> navigateToOnboarding()
+    }
 }
 
 @Composable
 fun SignInScreen(
-    navigateToHome: () -> Unit
+    onKakaoSignInClicked: () -> Unit,
+    onNaverSignInClicked: () -> Unit,
+    onGoogleSignInClicked: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -72,7 +125,7 @@ fun SignInScreen(
                     .size(50.dp)
                     .clip(CircleShape)
                     .background(RPAppTheme.colors.kakaoYello)
-                    .clickable(onClick = navigateToHome),
+                    .clickable(onClick = onKakaoSignInClicked),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -85,14 +138,14 @@ fun SignInScreen(
                 contentDescription = stringResource(id = R.string.sign_in_naver_login_description),
                 modifier = Modifier
                     .size(50.dp)
-                    .clickable(onClick = navigateToHome)
+                    .clickable(onClick = onNaverSignInClicked)
             )
             Image(
                 painter = painterResource(id = R.drawable.btn_google_login),
                 contentDescription = stringResource(id = R.string.sign_in_google_login_description),
                 modifier = Modifier
                     .size(50.dp)
-                    .clickable(onClick = navigateToHome)
+                    .clickable(onClick = onGoogleSignInClicked)
             )
         }
         Spacer(modifier = Modifier.weight(284f))
