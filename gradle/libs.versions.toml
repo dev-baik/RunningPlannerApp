@@ -6,9 +6,11 @@ composeBom = "2024.04.01"
 coreKtx = "1.15.0"
 espressoCore = "3.6.1"
 hilt = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 javaxInject = "1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
+kakao = "2.21.0"
 kotlin = "2.0.0"
 lifecycleRuntimeKtx = "2.8.7"
 navigation = "2.8.9"
@@ -31,10 +33,12 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakao" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

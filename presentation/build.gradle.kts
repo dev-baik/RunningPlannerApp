@@ -72,4 +72,10 @@ dependencies {
 
     // navigation
     implementation(libs.navigation.compose)
+
+    // kakao
+    implementation(libs.v2.user)
+
+    // ViewModel utilities for Compose
+    implementation(libs.hilt.navigation.compose)
 }
