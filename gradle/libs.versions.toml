@@ -13,6 +13,7 @@ junitVersion = "1.2.1"
 kakao = "2.21.0"
 kotlin = "2.0.0"
 lifecycleRuntimeKtx = "2.8.7"
+lottieCompose = "6.6.4"
 navigation = "2.8.9"
 timber = "5.0.1"
 
@@ -36,6 +37,7 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakao" }

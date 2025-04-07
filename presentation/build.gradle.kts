@@ -88,4 +88,7 @@ dependencies {
 
     // ViewModel utilities for Compose
     implementation(libs.hilt.navigation.compose)
+
+    // lottie
+    implementation(libs.lottie.compose)
 }
