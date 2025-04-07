@@ -1,6 +1,7 @@
 package com.android.master.presentation.feature.navigator
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -17,6 +18,7 @@ import com.android.master.presentation.feature.signin.navigation.SignInRoute
 import com.android.master.presentation.model.MainNavigationBarRoute
 import com.android.master.presentation.type.MainNavigationBarItemType
 
+@Stable
 class MainNavigator(
     val navHostController: NavHostController
 ) {
