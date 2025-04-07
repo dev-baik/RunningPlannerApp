@@ -37,6 +37,7 @@ import com.android.master.presentation.util.view.LoadState
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 
@@ -87,6 +88,18 @@ fun SignInRoute(
                         val uid = it.id.toString()
                         viewModel.setUserProfile(Profile(email, uid))
                     }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (AuthApiClient.instance.hasToken()) {
+            UserApiClient.instance.accessTokenInfo { tokenInfo, _ ->
+                if (tokenInfo != null) {
+                    viewModel.setEvent(
+                        SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
+                    )
                 }
             }
         }
