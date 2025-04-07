@@ -1,6 +1,7 @@
 package com.android.master.presentation.feature.navigator.component
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
@@ -15,7 +16,8 @@ import com.android.master.presentation.feature.signin.navigation.signInGraph
 fun MainNavHost(
     modifier: Modifier = Modifier,
     navigator: MainNavigator,
-    padding: PaddingValues
+    padding: PaddingValues,
+    onShowSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     NavHost(
         navController = navigator.navHostController,
@@ -30,7 +32,8 @@ fun MainNavHost(
 
         signInGraph(
             navigateToOnboarding = navigator::navigateToOnboarding,
-            navigateToHome = navigator::navigateToHome
+            navigateToHome = navigator::navigateToHome,
+            onShowSnackbar = onShowSnackbar
         )
 
         onboardingNavGraph()

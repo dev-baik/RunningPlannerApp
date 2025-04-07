@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -68,19 +69,20 @@ fun setLayoutLoginKakaoClickListener(
 fun SignInRoute(
     viewModel: SignInViewModel = hiltViewModel(),
     navigateToOnboarding: () -> Unit,
-    navigateToHome: () -> Unit
+    navigateToHome: () -> Unit,
+    onShowSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val callback: (OAuthToken?, Throwable?) -> Unit = { oAuthToken, throwable ->
         if (throwable != null) {
-            // TODO SnackBar
+            onShowSnackbar(throwable.message.toString(), SnackbarDuration.Short)
         } else if (oAuthToken != null) {
             // 카카오 유저 정보 가져오기
             UserApiClient.instance.me { user, error ->
                 if (error != null) {
-                    // TODO SnackBar
+                    onShowSnackbar(error.message.toString(), SnackbarDuration.Short)
                     UserApiClient.instance.logout {}
                 } else {
                     user?.let {
@@ -95,11 +97,13 @@ fun SignInRoute(
 
     LaunchedEffect(Unit) {
         if (AuthApiClient.instance.hasToken()) {
-            UserApiClient.instance.accessTokenInfo { tokenInfo, _ ->
+            UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
                 if (tokenInfo != null) {
                     viewModel.setEvent(
                         SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
                     )
+                } else if (error != null) {
+                    onShowSnackbar(error.message.toString(), SnackbarDuration.Short)
                 }
             }
         }
@@ -116,9 +120,9 @@ fun SignInRoute(
                     viewModel.setEvent(
                         SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Error)
                     )
-                }.addOnFailureListener {
+                }.addOnFailureListener { outerException ->
                     // 기존 사용자 파이어베이스 로그인
-                    if (it is FirebaseAuthUserCollisionException) {
+                    if (outerException is FirebaseAuthUserCollisionException) {
                         Firebase.auth.signInWithEmailAndPassword(
                             viewModel.currentState.profile.email,
                             viewModel.currentState.profile.uid
@@ -126,13 +130,14 @@ fun SignInRoute(
                             viewModel.setEvent(
                                 SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
                             )
-                        }.addOnFailureListener {
+                        }.addOnFailureListener { innerException ->
+                            onShowSnackbar(innerException.message.toString(), SnackbarDuration.Short)
                             viewModel.clearUserInfo()
                             UserApiClient.instance.logout {}
                             Firebase.auth.signOut()
                         }
                     } else {
-                        // TODO SnackBar
+                        onShowSnackbar(outerException.message.toString(), SnackbarDuration.Short)
                         viewModel.clearUserInfo()
                         UserApiClient.instance.logout {}
                         Firebase.auth.signOut()
