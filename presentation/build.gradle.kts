@@ -95,4 +95,8 @@ dependencies {
 
     // lottie
     implementation(libs.lottie.compose)
+
+    // coroutine
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
 }
