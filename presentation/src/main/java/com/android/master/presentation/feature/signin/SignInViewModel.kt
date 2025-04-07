@@ -3,6 +3,7 @@ package com.android.master.presentation.feature.signin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.master.domain.model.Profile
+import com.android.master.domain.usecase.signin.ClearUserInfoUseCase
 import com.android.master.domain.usecase.signin.SetUserProfileUseCase
 import com.android.master.presentation.util.view.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val setUserProfileUseCase: SetUserProfileUseCase
+    private val setUserProfileUseCase: SetUserProfileUseCase,
+    private val clearUserInfoUseCase: ClearUserInfoUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SignInContract.SignInUiState())
@@ -53,6 +55,12 @@ class SignInViewModel @Inject constructor(
                     profile = profile
                 )
             )
+        }
+    }
+
+    fun clearUserInfo() {
+        viewModelScope.launch {
+            clearUserInfoUseCase()
         }
     }
 }

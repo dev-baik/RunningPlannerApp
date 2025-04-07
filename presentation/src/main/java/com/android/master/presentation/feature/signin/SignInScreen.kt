@@ -34,6 +34,9 @@ import com.android.master.presentation.ui.component.view.RPAppLoadingView
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
 import com.android.master.presentation.util.view.LoadState
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 
@@ -92,7 +95,36 @@ fun SignInRoute(
     LaunchedEffect(uiState.userProfileLoadState) {
         when (uiState.userProfileLoadState) {
             LoadState.Success -> {
-                // TODO 파이어베이스 회원가입
+                // 파이어베이스 회원가입
+                Firebase.auth.createUserWithEmailAndPassword(
+                    viewModel.currentState.profile.email,
+                    viewModel.currentState.profile.uid
+                ).addOnSuccessListener {
+                    viewModel.setEvent(
+                        SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Error)
+                    )
+                }.addOnFailureListener {
+                    // 기존 사용자 파이어베이스 로그인
+                    if (it is FirebaseAuthUserCollisionException) {
+                        Firebase.auth.signInWithEmailAndPassword(
+                            viewModel.currentState.profile.email,
+                            viewModel.currentState.profile.uid
+                        ).addOnSuccessListener {
+                            viewModel.setEvent(
+                                SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
+                            )
+                        }.addOnFailureListener {
+                            viewModel.clearUserInfo()
+                            UserApiClient.instance.logout {}
+                            Firebase.auth.signOut()
+                        }
+                    } else {
+                        // TODO SnackBar
+                        viewModel.clearUserInfo()
+                        UserApiClient.instance.logout {}
+                        Firebase.auth.signOut()
+                    }
+                }
             }
 
             else -> Unit
