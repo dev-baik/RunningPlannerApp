@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.master.domain.model.Profile
 import com.android.master.presentation.R
 import com.android.master.presentation.ui.component.view.RPAppLoadingView
 import com.android.master.presentation.ui.theme.RPAPPTheme
@@ -71,7 +73,29 @@ fun SignInRoute(
         if (throwable != null) {
             // TODO SnackBar
         } else if (oAuthToken != null) {
-            // TODO 카카오 유저 정보 가져오기
+            // 카카오 유저 정보 가져오기
+            UserApiClient.instance.me { user, error ->
+                if (error != null) {
+                    // TODO SnackBar
+                    UserApiClient.instance.logout {}
+                } else {
+                    user?.let {
+                        val email = it.kakaoAccount?.email.orEmpty()
+                        val uid = it.id.toString()
+                        viewModel.setUserProfile(Profile(email, uid))
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(uiState.userProfileLoadState) {
+        when (uiState.userProfileLoadState) {
+            LoadState.Success -> {
+                // TODO 파이어베이스 회원가입
+            }
+
+            else -> Unit
         }
     }
 
