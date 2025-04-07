@@ -86,6 +86,10 @@ dependencies {
     // kakao
     implementation(libs.v2.user)
 
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
     // ViewModel utilities for Compose
     implementation(libs.hilt.navigation.compose)
 
