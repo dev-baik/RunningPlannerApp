@@ -47,4 +47,10 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+
+    // security
+    implementation(libs.security.crypto.ktx)
+
+    // gson
+    implementation(libs.gson)
 }

@@ -8,6 +8,7 @@ espressoCore = "3.6.1"
 firebaseAuth = "23.2.0"
 firebaseBom = "33.12.0"
 gms = "4.4.2"
+gson = "2.11.0"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
 javaxInject = "1"
@@ -18,6 +19,7 @@ kotlin = "2.0.0"
 lifecycleRuntimeKtx = "2.8.7"
 lottieCompose = "6.6.4"
 navigation = "2.8.9"
+securityCryptoKtx = "1.1.0-alpha06"
 timber = "5.0.1"
 
 [libraries]
@@ -37,6 +39,7 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuth" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -44,6 +47,7 @@ javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInjec
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakao" }
 
