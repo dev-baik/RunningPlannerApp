@@ -29,6 +29,7 @@ data class RPAppTypography(
     val bodyMed12: TextStyle,
 
     // Caption
+    val capReg16: TextStyle,
     val capReg12: TextStyle,
     val capSemi10: TextStyle,
     val capMed10: TextStyle,
@@ -91,6 +92,11 @@ val defaultRPAppTypography = RPAppTypography(
     ),
 
     // Caption
+    capReg16 = TextStyle(
+        fontFamily = SuitRegular,
+        fontSize = 16.sp,
+        lineHeight = 16.sp * 1.6
+    ),
     capReg12 = TextStyle(
         fontFamily = SuitRegular,
         fontSize = 12.sp,
