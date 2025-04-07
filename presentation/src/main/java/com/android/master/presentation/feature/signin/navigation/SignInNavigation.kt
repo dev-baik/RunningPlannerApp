@@ -5,10 +5,12 @@ import androidx.navigation.compose.composable
 import com.android.master.presentation.feature.signin.SignInRoute
 
 fun NavGraphBuilder.signInGraph(
-    navigateToHome: () -> Unit
+    navigateToOnboarding: () -> Unit,
+    navigateToHome: () -> Unit,
 ) {
     composable(route = SignInRoute.ROUTE) {
         SignInRoute(
+            navigateToOnboarding = navigateToOnboarding,
             navigateToHome = navigateToHome
         )
     }

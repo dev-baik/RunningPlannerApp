@@ -12,6 +12,7 @@ import androidx.navigation.navOptions
 import com.android.master.presentation.feature.diary.navigation.navigationDiary
 import com.android.master.presentation.feature.home.navigation.navigationHome
 import com.android.master.presentation.feature.mypage.navigation.navigationMyPage
+import com.android.master.presentation.feature.onboarding.navigation.navigationOnboarding
 import com.android.master.presentation.feature.signin.navigation.SignInRoute
 import com.android.master.presentation.model.MainNavigationBarRoute
 import com.android.master.presentation.type.MainNavigationBarItemType
@@ -48,6 +49,10 @@ class MainNavigator(
                 MainNavigationBarItemType.MY_PAGE -> navHostController.navigationMyPage(navOptions)
             }
         }
+    }
+
+    fun navigateToOnboarding() {
+        navHostController.navigationOnboarding()
     }
 
     fun navigateToHome(navOptions: NavOptions? = null) {
