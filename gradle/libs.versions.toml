@@ -5,13 +5,24 @@ appcompat = "1.7.0"
 composeBom = "2024.04.01"
 coreKtx = "1.15.0"
 espressoCore = "3.6.1"
+firebaseAuth = "23.2.0"
+firebaseBom = "33.12.0"
+gms = "4.4.2"
+gson = "2.11.0"
 hilt = "2.51.1"
+hiltNavigationCompose = "1.2.0"
 javaxInject = "1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
+kakao = "2.21.0"
 kotlin = "2.0.0"
+coroutines = "1.9.0"
 lifecycleRuntimeKtx = "2.8.7"
+lottieCompose = "6.6.4"
 navigation = "2.8.9"
+oauth = "5.10.0"
+playServicesAuth = "21.3.0"
+securityCryptoKtx = "1.1.0-alpha06"
 timber = "5.0.1"
 
 [libraries]
@@ -29,12 +40,23 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuth" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInject" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottieCompose" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+oauth = { group = "com.navercorp.nid", name="oauth", version.ref = "oauth" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+security-crypto-ktx = { group = "androidx.security", name = "security-crypto-ktx", version.ref = "securityCryptoKtx" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+v2-user = { group = "com.kakao.sdk", name = "v2-user", version.ref = "kakao" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -42,3 +64,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+gms = { id = "com.google.gms.google-services", version.ref = "gms" }

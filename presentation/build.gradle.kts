@@ -1,9 +1,15 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+}
+
+val properties = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -14,6 +20,14 @@ android {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "KAKAO_NATIVE_API_KEY", properties["kakao.navtive.app.key"].toString())
+        buildConfigField("String", "NAVER_CLIENT_ID", properties["NAVER_CLIENT_ID"].toString())
+        buildConfigField("String", "NAVER_CLIENT_NAME", properties["NAVER_CLIENT_NAME"].toString())
+        buildConfigField("String", "NAVER_CLIENT_SECRET", properties["NAVER_CLIENT_SECRET"].toString())
+        buildConfigField("String", "GOOGLE_CLIENT_ID", properties["GOOGLE_CLIENT_ID"].toString())
+
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY_MANIFEST"] = properties["kakao.native.app.key.manifest"] as String
     }
 
     buildTypes {
@@ -26,11 +40,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
@@ -72,4 +86,27 @@ dependencies {
 
     // navigation
     implementation(libs.navigation.compose)
+
+    // kakao
+    implementation(libs.v2.user)
+
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // ViewModel utilities for Compose
+    implementation(libs.hilt.navigation.compose)
+
+    // lottie
+    implementation(libs.lottie.compose)
+
+    // coroutine
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+
+    // naver
+    implementation(libs.oauth)
+
+    // google
+    implementation(libs.play.services.auth)
 }

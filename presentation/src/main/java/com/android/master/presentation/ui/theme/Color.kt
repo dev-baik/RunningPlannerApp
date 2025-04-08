@@ -29,6 +29,9 @@ val Gray900 = Color(0xFF242527)
 // Error
 val Error = Color(0xFFEB0555)
 
+// Kakao
+val KakaoYellow = Color(0xFFFEE500)
+
 @Immutable
 data class RPAppColors(
     // Primary
@@ -54,7 +57,10 @@ data class RPAppColors(
     val gray900: Color,
 
     // Error
-    val error: Color
+    val error: Color,
+
+    // Kakao
+    val kakaoYello: Color,
 )
 
 val defaultRPAppColors = RPAppColors(
@@ -81,7 +87,10 @@ val defaultRPAppColors = RPAppColors(
     gray900 = Gray900,
 
     // Error
-    error = Error
+    error = Error,
+
+    // Kakao
+    kakaoYello = KakaoYellow,
 )
 
 val LocalRPAppColors = staticCompositionLocalOf { defaultRPAppColors }

@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.android.master.presentation.feature.navigator.component.MainBottomBar
 import com.android.master.presentation.feature.navigator.component.MainNavHost
 import com.android.master.presentation.type.MainNavigationBarItemType
+import com.android.master.presentation.ui.component.view.RPAppSnackBar
 import com.android.master.presentation.ui.theme.RPAPPTheme
 
 @Preview(showBackground = true)
@@ -19,24 +20,33 @@ fun MainPreview() {
 
 @Composable
 fun MainScreen(
-    navigator: MainNavigator = rememberMainNavigator()
+    navigator: MainNavigator = rememberMainNavigator(),
+    mainState: MainState = rememberMainState()
 ) {
     MainScreenContent(
-        navigator = navigator
+        navigator = navigator,
+        mainState = mainState
     )
 }
 
 @Composable
 private fun MainScreenContent(
-    modifier: Modifier = Modifier,
-    navigator: MainNavigator
+    navigator: MainNavigator,
+    mainState: MainState,
+    modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
         content = { padding ->
             MainNavHost(
                 navigator = navigator,
-                padding = padding
+                padding = padding,
+                onShowSnackbar = { message, duration ->
+                    mainState.showSnackbar(
+                        message = message,
+                        duration = duration
+                    )
+                }
             )
         },
         bottomBar = {
@@ -46,6 +56,7 @@ private fun MainScreenContent(
                 onNavigationBarItemSelected = { navigator.navigateMainNavigation(it) },
                 currentNavigationBarItem = navigator.currentMainNavigationBarItem
             )
-        }
+        },
+        snackbarHost = { RPAppSnackBar(snackBarHostState = mainState.snackbarHostState) },
     )
 }
