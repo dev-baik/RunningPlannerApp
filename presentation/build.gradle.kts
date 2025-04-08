@@ -22,6 +22,9 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "KAKAO_NATIVE_API_KEY", properties["kakao.navtive.app.key"].toString())
+        buildConfigField("String", "NAVER_CLIENT_ID", properties["NAVER_CLIENT_ID"].toString())
+        buildConfigField("String", "NAVER_CLIENT_NAME", properties["NAVER_CLIENT_NAME"].toString())
+        buildConfigField("String", "NAVER_CLIENT_SECRET", properties["NAVER_CLIENT_SECRET"].toString())
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY_MANIFEST"] = properties["kakao.native.app.key.manifest"] as String
     }
@@ -99,4 +102,7 @@ dependencies {
     // coroutine
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
+
+    // naver
+    implementation(libs.oauth)
 }
