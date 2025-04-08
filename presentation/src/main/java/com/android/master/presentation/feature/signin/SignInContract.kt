@@ -9,6 +9,7 @@ import com.android.master.presentation.util.view.LoadState
 class SignInContract {
     data class SignInUiState(
         val loadState: LoadState = LoadState.Idle,
+        val autoLoginLoadState: LoadState = LoadState.Idle,
         val userProfileLoadState: LoadState = LoadState.Idle,
         val profile: Profile = Profile()
     ) : UiState
@@ -17,6 +18,7 @@ class SignInContract {
 
     sealed class SignInEvent : UiEvent {
         data class OnSuccessLogin(val loadState: LoadState) : SignInEvent()
+        data class OnSuccessAutoLogin(val autoLoginLoadState: LoadState, val profile: Profile) : SignInEvent()
         data class SetUserProfile(val userProfileLoadState: LoadState, val profile: Profile) : SignInEvent()
     }
 }

@@ -36,6 +36,7 @@ import com.android.master.domain.model.Profile
 import com.android.master.domain.model.Profile.Platform.GOOGLE
 import com.android.master.domain.model.Profile.Platform.KAKAO
 import com.android.master.domain.model.Profile.Platform.NAVER
+import com.android.master.domain.model.Profile.Platform.NONE
 import com.android.master.presentation.BuildConfig.GOOGLE_CLIENT_ID
 import com.android.master.presentation.R
 import com.android.master.presentation.ui.component.view.RPAppLoadingView
@@ -57,6 +58,8 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.navercorp.nid.profile.NidProfileCallback
 import com.navercorp.nid.profile.data.NidProfileResponse
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 @Preview(showBackground = true)
 @Composable
@@ -208,16 +211,48 @@ fun SignInRoute(
     }
 
     LaunchedEffect(Unit) {
-        if (AuthApiClient.instance.hasToken()) {
-            UserApiClient.instance.accessTokenInfo { tokenInfo, error ->
-                if (tokenInfo != null) {
-                    viewModel.setEvent(
-                        SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
-                    )
-                } else if (error != null) {
-                    onShowSnackbar(error.message.toString(), SnackbarDuration.Short)
+        viewModel.getUserProfile()
+    }
+
+    LaunchedEffect(uiState.autoLoginLoadState) {
+        when (uiState.autoLoginLoadState) {
+            LoadState.Success -> {
+                val isLoginSuccessful = when (viewModel.currentState.profile.platform) {
+                    NONE -> false
+
+                    KAKAO -> {
+                        if (AuthApiClient.instance.hasToken()) {
+                            suspendCancellableCoroutine<Boolean> { continuation ->
+                                UserApiClient.instance.accessTokenInfo { tokenInfo, _ ->
+                                    continuation.resume(tokenInfo != null)
+                                }
+                            }
+                        } else false
+                    }
+
+                    NAVER -> NaverIdLoginSDK.getAccessToken()?.isNotEmpty() ?: false
+
+                    GOOGLE -> {
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        if (account != null) {
+                            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                            suspendCancellableCoroutine<Boolean> { continuation ->
+                                Firebase.auth.signInWithCredential(credential)
+                                    .addOnSuccessListener { continuation.resume(true) }
+                                    .addOnFailureListener { continuation.resume(false) }
+                            }
+                        } else false
+                    }
                 }
+
+                viewModel.setEvent(
+                    SignInContract.SignInEvent.OnSuccessLogin(
+                        loadState = if (isLoginSuccessful) LoadState.Success else LoadState.Idle
+                    )
+                )
             }
+
+            else -> Unit
         }
     }
 

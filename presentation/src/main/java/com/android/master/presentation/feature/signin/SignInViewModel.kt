@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.master.domain.model.Profile
 import com.android.master.domain.usecase.signin.ClearUserInfoUseCase
+import com.android.master.domain.usecase.signin.GetUserProfileUseCase
 import com.android.master.domain.usecase.signin.SetUserProfileUseCase
 import com.android.master.presentation.util.view.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
+    private val getUserProfileUseCase: GetUserProfileUseCase,
     private val setUserProfileUseCase: SetUserProfileUseCase,
     private val clearUserInfoUseCase: ClearUserInfoUseCase
 ) : ViewModel() {
@@ -33,15 +35,34 @@ class SignInViewModel @Inject constructor(
 
     private fun handleEvent(event: SignInContract.SignInEvent) {
         when (event) {
+            is SignInContract.SignInEvent.OnSuccessLogin -> {
+                _uiState.value = currentState.copy(loadState = event.loadState)
+            }
+
+            is SignInContract.SignInEvent.OnSuccessAutoLogin -> {
+                _uiState.value = currentState.copy(
+                    autoLoginLoadState = event.autoLoginLoadState,
+                    profile = event.profile
+                )
+            }
+
             is SignInContract.SignInEvent.SetUserProfile -> {
                 _uiState.value = currentState.copy(
                     userProfileLoadState = event.userProfileLoadState,
                     profile = event.profile
                 )
             }
-            is SignInContract.SignInEvent.OnSuccessLogin -> {
-                _uiState.value = currentState.copy(loadState = event.loadState)
-            }
+        }
+    }
+
+    fun getUserProfile() {
+        viewModelScope.launch {
+            setEvent(
+                SignInContract.SignInEvent.OnSuccessAutoLogin(
+                    autoLoginLoadState = LoadState.Success,
+                    profile = getUserProfileUseCase()
+                )
+            )
         }
     }
 
