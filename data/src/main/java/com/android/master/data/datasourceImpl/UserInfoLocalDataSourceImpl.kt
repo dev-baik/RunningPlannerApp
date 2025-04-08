@@ -35,7 +35,7 @@ class UserInfoLocalDataSourceImpl @Inject constructor(
     private val gson = Gson()
 
     override var profile: Profile
-        get() = gson.fromJson(sharedPreferences.getString(PROFILE, INITIAL_VALUE), Profile::class.java)
+        get() = gson.fromJson(sharedPreferences.getString(PROFILE, INITIAL_VALUE), Profile::class.java) ?: Profile()
         set(value) { sharedPreferences.edit { putString(PROFILE, gson.toJson(value)) } }
 
     override fun clear() = sharedPreferences.edit { clear() }
