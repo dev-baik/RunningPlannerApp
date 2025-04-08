@@ -28,8 +28,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.master.domain.model.Profile
+import com.android.master.domain.model.Profile.Platform.KAKAO
+import com.android.master.domain.model.Profile.Platform.NAVER
 import com.android.master.presentation.R
 import com.android.master.presentation.ui.component.view.RPAppLoadingView
 import com.android.master.presentation.ui.theme.RPAPPTheme
@@ -42,7 +45,10 @@ import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
+import com.navercorp.nid.profile.NidProfileCallback
+import com.navercorp.nid.profile.data.NidProfileResponse
 
 @Preview(showBackground = true)
 @Composable
@@ -95,9 +101,13 @@ fun SignInRoute(
                     UserApiClient.instance.logout {}
                 } else {
                     user?.let {
-                        val email = it.kakaoAccount?.email.orEmpty()
-                        val uid = it.id.toString()
-                        viewModel.setUserProfile(Profile(email, uid))
+                        viewModel.setUserProfile(
+                            Profile(
+                                email = it.kakaoAccount?.email.orEmpty(),
+                                uid = it.id.toString(),
+                                platform = KAKAO
+                            )
+                        )
                     }
                 }
             }
@@ -106,7 +116,28 @@ fun SignInRoute(
 
     val oauthNaverLoginCallback = object : OAuthLoginCallback {
         override fun onSuccess() {
-            // TODO 네이버 유저 정보 가져오기
+            // 네이버 유저 정보 가져오기
+            NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
+                override fun onSuccess(result: NidProfileResponse) {
+                    result.profile?.let {
+                        viewModel.setUserProfile(
+                            Profile(
+                                email = it.email.orEmpty(),
+                                uid = it.id.toString(),
+                                platform = NAVER
+                            )
+                        )
+                    }
+                }
+
+                override fun onFailure(httpStatus: Int, message: String) {
+                    onShowSnackbar(message, SnackbarDuration.Short)
+                }
+
+                override fun onError(errorCode: Int, message: String) {
+                    onShowSnackbar(message, SnackbarDuration.Short)
+                }
+            })
         }
 
         override fun onFailure(httpStatus: Int, message: String) {
