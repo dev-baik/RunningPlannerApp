@@ -97,6 +97,14 @@ private fun getGoogleClient(context: Context): GoogleSignInClient {
     return GoogleSignIn.getClient(context, googleSignInOption)
 }
 
+private fun signOutFromPlatform(platform: Profile.Platform) {
+    when (platform) {
+        KAKAO -> UserApiClient.instance.logout {}
+        NAVER -> NaverIdLoginSDK.logout()
+        else -> Unit
+    }
+}
+
 @Composable
 fun SignInRoute(
     viewModel: SignInViewModel = hiltViewModel(),
@@ -237,16 +245,32 @@ fun SignInRoute(
                         }.addOnFailureListener { innerException ->
                             onShowSnackbar(innerException.message.toString(), SnackbarDuration.Short)
                             viewModel.clearUserInfo()
-                            UserApiClient.instance.logout {}
-                            Firebase.auth.signOut()
+                            signOutFromPlatform(viewModel.currentState.profile.platform)
+                            viewModel.setEvent(
+                                SignInContract.SignInEvent.SetUserProfile(
+                                    userProfileLoadState = LoadState.Error,
+                                    profile = Profile()
+                                )
+                            )
                         }
                     } else {
                         onShowSnackbar(outerException.message.toString(), SnackbarDuration.Short)
                         viewModel.clearUserInfo()
-                        UserApiClient.instance.logout {}
-                        Firebase.auth.signOut()
+                        signOutFromPlatform(viewModel.currentState.profile.platform)
+                        viewModel.setEvent(
+                            SignInContract.SignInEvent.SetUserProfile(
+                                userProfileLoadState = LoadState.Error,
+                                profile = Profile()
+                            )
+                        )
                     }
                 }
+            }
+
+            LoadState.Error -> {
+                viewModel.setEvent(
+                    SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Idle)
+                )
             }
 
             else -> Unit
