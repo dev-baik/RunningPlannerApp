@@ -53,8 +53,15 @@ class MainNavigator(
         }
     }
 
-    fun navigateToOnboarding() {
-        navHostController.navigationOnboarding()
+    fun navigateToOnboarding(navOptions: NavOptions? = null) {
+        navHostController.navigationOnboarding(
+            navOptions ?: navOptions {
+                popUpTo(navHostController.graph.findStartDestination().id) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        )
     }
 
     fun navigateToHome(navOptions: NavOptions? = null) {
