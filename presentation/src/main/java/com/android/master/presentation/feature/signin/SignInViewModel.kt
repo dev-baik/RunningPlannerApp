@@ -58,6 +58,18 @@ class SignInViewModel @Inject constructor(
         }
     }
 
+    fun loginGoogleUser(profile: Profile, isNewUser: Boolean) {
+        viewModelScope.launch {
+            setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Loading))
+            setUserProfileUseCase(profile)
+            if (isNewUser) {
+                setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Error))
+            } else {
+                setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success))
+            }
+        }
+    }
+
     fun clearUserInfo() {
         viewModelScope.launch {
             clearUserInfoUseCase()

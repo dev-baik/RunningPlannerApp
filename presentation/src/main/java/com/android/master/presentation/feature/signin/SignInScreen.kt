@@ -1,6 +1,9 @@
 package com.android.master.presentation.feature.signin
 
+import android.app.Activity
 import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,17 +31,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.master.domain.model.Profile
+import com.android.master.domain.model.Profile.Platform.GOOGLE
 import com.android.master.domain.model.Profile.Platform.KAKAO
 import com.android.master.domain.model.Profile.Platform.NAVER
+import com.android.master.presentation.BuildConfig.GOOGLE_CLIENT_ID
 import com.android.master.presentation.R
 import com.android.master.presentation.ui.component.view.RPAppLoadingView
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
 import com.android.master.presentation.util.view.LoadState
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.AuthApiClient
@@ -78,6 +86,15 @@ fun setLayoutLoginNaverClickListener(
     callback: OAuthLoginCallback
 ) {
     NaverIdLoginSDK.authenticate(context, callback)
+}
+
+private fun getGoogleClient(context: Context): GoogleSignInClient {
+    val googleSignInOption = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(GOOGLE_CLIENT_ID)
+        .requestEmail()
+        .build()
+
+    return GoogleSignIn.getClient(context, googleSignInOption)
 }
 
 @Composable
@@ -146,6 +163,39 @@ fun SignInRoute(
 
         override fun onError(errorCode: Int, message: String) {
             onShowSnackbar(message, SnackbarDuration.Short)
+        }
+    }
+
+    val googleLoginForResult = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                val account = GoogleSignIn.getSignedInAccountFromIntent(data).result
+                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+                Firebase.auth.signInWithCredential(credential)
+                    .addOnSuccessListener {
+                        viewModel.loginGoogleUser(
+                            profile = Profile(
+                                email = account.email.orEmpty(),
+                                uid = it.user?.uid.orEmpty(),
+                                platform = GOOGLE
+                            ),
+                            isNewUser = it.additionalUserInfo?.isNewUser ?: true
+                        )
+                    }
+                    .addOnFailureListener {
+                        onShowSnackbar(it.message.toString(), SnackbarDuration.Short)
+                        viewModel.clearUserInfo()
+                        viewModel.setEvent(
+                            SignInContract.SignInEvent.SetUserProfile(
+                                userProfileLoadState = LoadState.Error,
+                                profile = Profile()
+                            )
+                        )
+                    }
+            }
         }
     }
 
@@ -218,7 +268,9 @@ fun SignInRoute(
                         callback = oauthNaverLoginCallback
                     )
                 },
-                onGoogleSignInClicked = {},
+                onGoogleSignInClicked = {
+                    googleLoginForResult.launch(getGoogleClient(context).signInIntent)
+                }
             )
         }
 
