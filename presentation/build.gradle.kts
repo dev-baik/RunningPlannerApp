@@ -25,6 +25,7 @@ android {
         buildConfigField("String", "NAVER_CLIENT_ID", properties["NAVER_CLIENT_ID"].toString())
         buildConfigField("String", "NAVER_CLIENT_NAME", properties["NAVER_CLIENT_NAME"].toString())
         buildConfigField("String", "NAVER_CLIENT_SECRET", properties["NAVER_CLIENT_SECRET"].toString())
+        buildConfigField("String", "GOOGLE_CLIENT_ID", properties["GOOGLE_CLIENT_ID"].toString())
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY_MANIFEST"] = properties["kakao.native.app.key.manifest"] as String
     }
@@ -105,4 +106,7 @@ dependencies {
 
     // naver
     implementation(libs.oauth)
+
+    // google
+    implementation(libs.play.services.auth)
 }
