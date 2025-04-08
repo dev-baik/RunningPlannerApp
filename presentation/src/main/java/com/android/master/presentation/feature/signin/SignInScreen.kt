@@ -41,6 +41,8 @@ import com.google.firebase.ktx.Firebase
 import com.kakao.sdk.auth.AuthApiClient
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
+import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.OAuthLoginCallback
 
 @Preview(showBackground = true)
 @Composable
@@ -65,6 +67,13 @@ fun setLayoutLoginKakaoClickListener(
     }
 }
 
+fun setLayoutLoginNaverClickListener(
+    context: Context,
+    callback: OAuthLoginCallback
+) {
+    NaverIdLoginSDK.authenticate(context, callback)
+}
+
 @Composable
 fun SignInRoute(
     viewModel: SignInViewModel = hiltViewModel(),
@@ -75,7 +84,7 @@ fun SignInRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    val callback: (OAuthToken?, Throwable?) -> Unit = { oAuthToken, throwable ->
+    val oauthKakaoLoginCallback: (OAuthToken?, Throwable?) -> Unit = { oAuthToken, throwable ->
         if (throwable != null) {
             onShowSnackbar(throwable.message.toString(), SnackbarDuration.Short)
         } else if (oAuthToken != null) {
@@ -92,6 +101,20 @@ fun SignInRoute(
                     }
                 }
             }
+        }
+    }
+
+    val oauthNaverLoginCallback = object : OAuthLoginCallback {
+        override fun onSuccess() {
+            // TODO 네이버 유저 정보 가져오기
+        }
+
+        override fun onFailure(httpStatus: Int, message: String) {
+            onShowSnackbar(message, SnackbarDuration.Short)
+        }
+
+        override fun onError(errorCode: Int, message: String) {
+            onShowSnackbar(message, SnackbarDuration.Short)
         }
     }
 
@@ -153,9 +176,17 @@ fun SignInRoute(
         LoadState.Idle -> {
             SignInScreen(
                 onKakaoSignInClicked = {
-                    setLayoutLoginKakaoClickListener(context = context, callback = callback)
+                    setLayoutLoginKakaoClickListener(
+                        context = context,
+                        callback = oauthKakaoLoginCallback
+                    )
                 },
-                onNaverSignInClicked = {},
+                onNaverSignInClicked = {
+                    setLayoutLoginNaverClickListener(
+                        context = context,
+                        callback = oauthNaverLoginCallback
+                    )
+                },
                 onGoogleSignInClicked = {},
             )
         }
