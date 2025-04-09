@@ -34,4 +34,8 @@
     <string name="onboarding_third_description">세 번째 온보딩 설명란 입니다.</string>
     <string name="onboarding_third_sub_description">세 번째 온보딩 세부 설명란 입니다. </string>
     <string name="onboarding_third_image_description">세 번째 온보딩 이미지입니다.</string>
+
+    <!-- OnboardingScreen -->
+    <string name="onboarding_home">홈으로 이동하기</string>
+    <string name="onboarding_next">다음</string>
 </resources>
