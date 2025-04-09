@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import com.android.master.presentation.R
 import com.android.master.presentation.type.OnboardingType
 import com.android.master.presentation.ui.component.button.RPAppOutlinedButton
@@ -45,15 +48,26 @@ fun OnboardingScreenPreview() {
 fun OnboardingRoute(
     viewModel: OnBoardingViewModel = hiltViewModel(),
     padding: PaddingValues,
+    navigateToHome: () -> Unit
 ) {
+    val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { OnboardingType.entries.size })
+
+    LaunchedEffect(viewModel.sideEffect, lifecycleOwner) {
+        viewModel.sideEffect.flowWithLifecycle(lifecycle = lifecycleOwner.lifecycle)
+            .collect { onBoardingSideEffect ->
+                when (onBoardingSideEffect) {
+                    OnBoardingContract.OnBoardingSideEffect.NavigationToHome -> navigateToHome()
+                }
+            }
+    }
 
     OnboardingScreen(
         padding = padding,
         pagerState = pagerState,
         coroutineScope = coroutineScope,
-        onHomeButtonClicked = { }
+        onHomeButtonClicked = { viewModel.setSideEffect(OnBoardingContract.OnBoardingSideEffect.NavigationToHome) }
     )
 }
 
