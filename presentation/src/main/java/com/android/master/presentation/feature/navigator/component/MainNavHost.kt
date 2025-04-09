@@ -36,6 +36,10 @@ fun MainNavHost(
             onShowSnackbar = onShowSnackbar
         )
 
-        onboardingNavGraph()
+        onboardingNavGraph(
+            padding = padding,
+            navigateToHome = navigator::navigateToHome,
+            onShowSnackbar = onShowSnackbar
+        )
     }
 }

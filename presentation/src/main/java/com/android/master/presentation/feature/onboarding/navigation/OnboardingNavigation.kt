@@ -1,5 +1,7 @@
 package com.android.master.presentation.feature.onboarding.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.SnackbarDuration
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -13,9 +15,17 @@ fun NavController.navigationOnboarding(navOptions: NavOptions) {
     )
 }
 
-fun NavGraphBuilder.onboardingNavGraph() {
+fun NavGraphBuilder.onboardingNavGraph(
+    padding: PaddingValues,
+    navigateToHome: (NavOptions) -> Unit,
+    onShowSnackbar: (String, SnackbarDuration) -> Unit,
+) {
     composable(route = OnboardingRoute.ROUTE) {
-        OnboardingRoute()
+        OnboardingRoute(
+            padding = padding,
+            navigateToHome = navigateToHome,
+            onShowSnackbar = onShowSnackbar
+        )
     }
 }
 

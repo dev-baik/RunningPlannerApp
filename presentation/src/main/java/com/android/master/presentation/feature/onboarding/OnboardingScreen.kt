@@ -28,8 +28,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.flowWithLifecycle
+import androidx.navigation.NavOptions
+import androidx.navigation.navOptions
 import com.android.master.presentation.Onboarding.FIRST
 import com.android.master.presentation.R
+import com.android.master.presentation.feature.onboarding.navigation.OnboardingRoute
 import com.android.master.presentation.type.OnboardingType
 import com.android.master.presentation.ui.component.button.RPAppOutlinedButton
 import com.android.master.presentation.ui.theme.RPAPPTheme
@@ -54,7 +57,7 @@ fun OnboardingRoute(
     viewModel: OnBoardingViewModel = hiltViewModel(),
     padding: PaddingValues,
     onShowSnackbar: (String, SnackbarDuration) -> Unit,
-    navigateToHome: () -> Unit
+    navigateToHome: (NavOptions) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -68,7 +71,10 @@ fun OnboardingRoute(
                 if (System.currentTimeMillis() - backPressedTime <= 500L) {
                     context.findActivity().finish()
                 } else {
-                    onShowSnackbar(context.getString(R.string.app_finish_toast), SnackbarDuration.Short)
+                    onShowSnackbar(
+                        context.getString(R.string.app_finish_toast),
+                        SnackbarDuration.Short
+                    )
                 }
                 backPressedTime = System.currentTimeMillis()
             }
@@ -85,7 +91,14 @@ fun OnboardingRoute(
         viewModel.sideEffect.flowWithLifecycle(lifecycle = lifecycleOwner.lifecycle)
             .collect { onBoardingSideEffect ->
                 when (onBoardingSideEffect) {
-                    OnBoardingContract.OnBoardingSideEffect.NavigationToHome -> navigateToHome()
+                    OnBoardingContract.OnBoardingSideEffect.NavigationToHome -> navigateToHome(
+                        navOptions {
+                            popUpTo(OnboardingRoute.ROUTE) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    )
                 }
             }
     }
