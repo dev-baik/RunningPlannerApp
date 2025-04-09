@@ -35,6 +35,7 @@ import com.android.master.presentation.R
 import com.android.master.presentation.feature.onboarding.navigation.OnboardingRoute
 import com.android.master.presentation.type.OnboardingType
 import com.android.master.presentation.ui.component.button.RPAppOutlinedButton
+import com.android.master.presentation.ui.component.dotsindicator.DotsIndicator
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
 import com.android.master.presentation.util.context.findActivity
@@ -71,10 +72,7 @@ fun OnboardingRoute(
                 if (System.currentTimeMillis() - backPressedTime <= 500L) {
                     context.findActivity().finish()
                 } else {
-                    onShowSnackbar(
-                        context.getString(R.string.app_finish_toast),
-                        SnackbarDuration.Short
-                    )
+                    onShowSnackbar(context.getString(R.string.app_finish_toast), SnackbarDuration.Short)
                 }
                 backPressedTime = System.currentTimeMillis()
             }
@@ -185,6 +183,13 @@ fun OnboardingScreen(
                 }
             }
         )
-        Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(15.dp))
+        DotsIndicator(
+            totalDots = OnboardingType.entries.size,
+            selectedIndex = pagerState.currentPage,
+            indicatorSize = 8.dp,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Spacer(modifier = Modifier.height(15.dp))
     }
 }
