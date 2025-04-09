@@ -5,3 +5,7 @@ object LoadingView {
     const val CLIP_MIN = 0
     const val CLIP_MAX = 1200
 }
+
+object Onboarding {
+    const val FIRST = 0
+}

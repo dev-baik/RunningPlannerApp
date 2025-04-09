@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">presentation</string>
 
+    <!-- 공통 -->
+    <string name="app_finish_toast">한 번 더 클릭하면 앱이 종료됩니다.</string>
+
     <!-- Splash -->
     <string name="splash_logo_description">로고 이미지 입니다.</string>
     <string name="splash_title">Running Planner App</string>
@@ -20,4 +23,22 @@
 
     <!-- SnackBar -->
     <string name="snackbar_icon_description">스낵바 아이콘입니다.</string>
+
+    <!-- OnboardingType -->
+    <string name="onboarding_first_title">첫 번째 온보딩 제목란 입니다.</string>
+    <string name="onboarding_first_description">첫 번째 온보딩 설명란 입니다.</string>
+    <string name="onboarding_first_sub_description">첫 번째 온보딩 세부 설명란 입니다. </string>
+    <string name="onboarding_first_image_description">첫 번째 온보딩 이미지입니다.</string>
+    <string name="onboarding_second_title">두 번째 온보딩 제목란 입니다.</string>
+    <string name="onboarding_second_description">두 번째 온보딩 설명란 입니다.</string>
+    <string name="onboarding_second_sub_description">두 번째 온보딩 세부 설명란 입니다. </string>
+    <string name="onboarding_second_image_description">두 번째 온보딩 이미지입니다.</string>
+    <string name="onboarding_third_title">세 번째 온보딩 제목란 입니다.</string>
+    <string name="onboarding_third_description">세 번째 온보딩 설명란 입니다.</string>
+    <string name="onboarding_third_sub_description">세 번째 온보딩 세부 설명란 입니다. </string>
+    <string name="onboarding_third_image_description">세 번째 온보딩 이미지입니다.</string>
+
+    <!-- OnboardingScreen -->
+    <string name="onboarding_home">홈으로 이동하기</string>
+    <string name="onboarding_next">다음</string>
 </resources>

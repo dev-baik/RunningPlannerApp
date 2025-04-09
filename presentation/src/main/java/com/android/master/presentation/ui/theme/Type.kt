@@ -22,6 +22,7 @@ data class RPAppTypography(
     val titleSemi12: TextStyle,
 
     // Body
+    val bodySemi16: TextStyle,
     val bodyMed16: TextStyle,
     val bodyReg16: TextStyle,
     val bodyMed14: TextStyle,
@@ -65,6 +66,11 @@ val defaultRPAppTypography = RPAppTypography(
     ),
 
     // Body
+    bodySemi16 = TextStyle(
+        fontFamily = SuitSemiBold,
+        fontSize = 16.sp,
+        lineHeight = 16.sp * 1.6
+    ),
     bodyMed16 = TextStyle(
         fontFamily = SuitMedium,
         fontSize = 16.sp,
