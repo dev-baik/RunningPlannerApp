@@ -1,5 +1,6 @@
 package com.android.master.presentation.feature.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,11 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.flowWithLifecycle
+import com.android.master.presentation.Onboarding.FIRST
 import com.android.master.presentation.R
 import com.android.master.presentation.type.OnboardingType
 import com.android.master.presentation.ui.component.button.RPAppOutlinedButton
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
+import com.android.master.presentation.util.context.findActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -48,11 +53,33 @@ fun OnboardingScreenPreview() {
 fun OnboardingRoute(
     viewModel: OnBoardingViewModel = hiltViewModel(),
     padding: PaddingValues,
+    onShowSnackbar: (String, SnackbarDuration) -> Unit,
     navigateToHome: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(pageCount = { OnboardingType.entries.size })
+    val context = LocalContext.current
+    var backPressedTime = 0L
+
+    BackHandler {
+        when (pagerState.currentPage) {
+            FIRST -> {
+                if (System.currentTimeMillis() - backPressedTime <= 500L) {
+                    context.findActivity().finish()
+                } else {
+                    onShowSnackbar(context.getString(R.string.app_finish_toast), SnackbarDuration.Short)
+                }
+                backPressedTime = System.currentTimeMillis()
+            }
+
+            else -> {
+                coroutineScope.launch {
+                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(viewModel.sideEffect, lifecycleOwner) {
         viewModel.sideEffect.flowWithLifecycle(lifecycle = lifecycleOwner.lifecycle)
