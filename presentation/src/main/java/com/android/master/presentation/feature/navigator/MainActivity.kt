@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.android.master.presentation.BuildConfig.KAKAO_NATIVE_API_KEY
 import com.android.master.presentation.BuildConfig.NAVER_CLIENT_ID
@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         setNaver()
         enableEdgeToEdge()
         setContent {
-            var showSplash by remember { mutableStateOf(true) }
+            var showSplash by rememberSaveable { mutableStateOf(true) }
 
             RPAPPTheme {
                 LaunchedEffect(Unit) {

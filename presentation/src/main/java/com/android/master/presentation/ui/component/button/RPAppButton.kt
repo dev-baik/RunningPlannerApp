@@ -54,7 +54,7 @@ fun RPAppButton(
             .background(color = backgroundColor)
             .border(width = borderWidth, color = borderColor, shape = RoundedCornerShape(cornerRadius))
             .padding(horizontal = paddingHorizontal, vertical = paddingVertical)
-            .clickable { onClick() }
+            .clickable(onClick = onClick)
     ) {
         content()
     }

@@ -1,6 +1,6 @@
 package com.android.master.data.repositoryImpl
 
-import com.android.master.data.datasource.UserInfoLocalDataSource
+import com.android.master.data.source.remote.source.datasource.UserInfoLocalDataSource
 import com.android.master.domain.model.Profile
 import com.android.master.domain.repository.UserInfoRepository
 import javax.inject.Inject

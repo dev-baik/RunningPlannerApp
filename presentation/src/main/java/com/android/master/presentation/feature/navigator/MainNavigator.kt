@@ -15,6 +15,7 @@ import com.android.master.presentation.feature.home.navigation.navigationHome
 import com.android.master.presentation.feature.mypage.navigation.navigationMyPage
 import com.android.master.presentation.feature.onboarding.navigation.navigationOnboarding
 import com.android.master.presentation.feature.signin.navigation.SignInRoute
+import com.android.master.presentation.feature.video.navigation.navigationVideo
 import com.android.master.presentation.model.MainNavigationBarRoute
 import com.android.master.presentation.type.MainNavigationBarItemType
 
@@ -56,7 +57,7 @@ class MainNavigator(
     fun navigateToOnboarding(navOptions: NavOptions? = null) {
         navHostController.navigationOnboarding(
             navOptions ?: navOptions {
-                popUpTo(navHostController.graph.findStartDestination().id) {
+                popUpTo(navHostController.previousBackStackEntry?.destination?.route ?: "Unknown") {
                     inclusive = true
                 }
                 launchSingleTop = true
@@ -73,6 +74,10 @@ class MainNavigator(
                 launchSingleTop = true
             }
         )
+    }
+
+    fun navigateToVideo() {
+        navHostController.navigationVideo()
     }
 }
 

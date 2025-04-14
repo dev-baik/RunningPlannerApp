@@ -6,10 +6,14 @@ import com.android.master.domain.model.Profile
 import com.android.master.domain.usecase.signin.ClearUserInfoUseCase
 import com.android.master.domain.usecase.signin.GetUserProfileUseCase
 import com.android.master.domain.usecase.signin.SetUserProfileUseCase
+import com.android.master.presentation.feature.onboarding.OnBoardingContract
 import com.android.master.presentation.util.view.LoadState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,6 +30,10 @@ class SignInViewModel @Inject constructor(
         get() = _uiState.asStateFlow()
     val currentState: SignInContract.SignInUiState
         get() = uiState.value
+
+    private val _sideEffect: MutableSharedFlow<SignInContract.SignInSideEffect> = MutableSharedFlow()
+    val sideEffect: SharedFlow<SignInContract.SignInSideEffect>
+        get() = _sideEffect.asSharedFlow()
 
     fun setEvent(event: SignInContract.SignInEvent) {
         viewModelScope.launch {
@@ -53,6 +61,10 @@ class SignInViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun setSideEffect(sideEffect: SignInContract.SignInSideEffect) {
+        viewModelScope.launch { _sideEffect.emit(sideEffect) }
     }
 
     fun getUserProfile() {

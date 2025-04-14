@@ -1,4 +1,4 @@
-package com.android.master.data.datasourceImpl
+package com.android.master.data.source.remote.source.datasourceImpl
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,7 +6,7 @@ import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.android.master.data.BuildConfig
-import com.android.master.data.datasource.UserInfoLocalDataSource
+import com.android.master.data.source.remote.source.datasource.UserInfoLocalDataSource
 import com.android.master.domain.model.Profile
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext

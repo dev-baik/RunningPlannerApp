@@ -11,6 +11,7 @@ import com.android.master.presentation.feature.mypage.navigation.myPageNavGraph
 import com.android.master.presentation.feature.navigator.MainNavigator
 import com.android.master.presentation.feature.onboarding.navigation.onboardingNavGraph
 import com.android.master.presentation.feature.signin.navigation.signInGraph
+import com.android.master.presentation.feature.video.navigation.videoNavGraph
 
 @Composable
 fun MainNavHost(
@@ -24,7 +25,10 @@ fun MainNavHost(
         startDestination = navigator.startDestination,
         modifier = modifier
     ) {
-        homeNavGraph(padding = padding)
+        homeNavGraph(
+            padding = padding,
+            onVideoButtonClicked = navigator::navigateToVideo,
+        )
 
         diaryNavGraph(padding = padding)
 
@@ -39,6 +43,11 @@ fun MainNavHost(
         onboardingNavGraph(
             padding = padding,
             navigateToHome = navigator::navigateToHome,
+            onShowSnackbar = onShowSnackbar
+        )
+
+        videoNavGraph(
+            padding = padding,
             onShowSnackbar = onShowSnackbar
         )
     }

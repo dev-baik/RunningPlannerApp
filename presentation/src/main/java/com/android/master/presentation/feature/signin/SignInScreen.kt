@@ -31,7 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import com.android.master.domain.model.Profile
 import com.android.master.domain.model.Profile.Platform.GOOGLE
 import com.android.master.domain.model.Profile.Platform.KAKAO
@@ -117,25 +119,20 @@ fun SignInRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val oauthKakaoLoginCallback: (OAuthToken?, Throwable?) -> Unit = { oAuthToken, throwable ->
         if (throwable != null) {
-            onShowSnackbar(throwable.message.toString(), SnackbarDuration.Short)
+            viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = throwable.message.toString()))
         } else if (oAuthToken != null) {
             // 카카오 유저 정보 가져오기
             UserApiClient.instance.me { user, error ->
                 if (error != null) {
-                    onShowSnackbar(error.message.toString(), SnackbarDuration.Short)
+                    viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = error.message.toString()))
                     UserApiClient.instance.logout {}
                 } else {
                     user?.let {
-                        viewModel.setUserProfile(
-                            Profile(
-                                email = it.kakaoAccount?.email.orEmpty(),
-                                uid = it.id.toString(),
-                                platform = KAKAO
-                            )
-                        )
+                        viewModel.setUserProfile(Profile(email = it.kakaoAccount?.email.orEmpty(), uid = it.id.toString(), platform = KAKAO))
                     }
                 }
             }
@@ -148,32 +145,26 @@ fun SignInRoute(
             NidOAuthLogin().callProfileApi(object : NidProfileCallback<NidProfileResponse> {
                 override fun onSuccess(result: NidProfileResponse) {
                     result.profile?.let {
-                        viewModel.setUserProfile(
-                            Profile(
-                                email = it.email.orEmpty(),
-                                uid = it.id.toString(),
-                                platform = NAVER
-                            )
-                        )
+                        viewModel.setUserProfile(Profile(email = it.email.orEmpty(), uid = it.id.toString(), platform = NAVER))
                     }
                 }
 
                 override fun onFailure(httpStatus: Int, message: String) {
-                    onShowSnackbar(message, SnackbarDuration.Short)
+                    viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = message))
                 }
 
                 override fun onError(errorCode: Int, message: String) {
-                    onShowSnackbar(message, SnackbarDuration.Short)
+                    viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = message))
                 }
             })
         }
 
         override fun onFailure(httpStatus: Int, message: String) {
-            onShowSnackbar(message, SnackbarDuration.Short)
+            viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = message))
         }
 
         override fun onError(errorCode: Int, message: String) {
-            onShowSnackbar(message, SnackbarDuration.Short)
+            viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = message))
         }
     }
 
@@ -188,23 +179,14 @@ fun SignInRoute(
                 Firebase.auth.signInWithCredential(credential)
                     .addOnSuccessListener {
                         viewModel.loginGoogleUser(
-                            profile = Profile(
-                                email = account.email.orEmpty(),
-                                uid = it.user?.uid.orEmpty(),
-                                platform = GOOGLE
-                            ),
+                            profile = Profile(email = account.email.orEmpty(), uid = it.user?.uid.orEmpty(), platform = GOOGLE),
                             isNewUser = it.additionalUserInfo?.isNewUser ?: true
                         )
                     }
                     .addOnFailureListener {
-                        onShowSnackbar(it.message.toString(), SnackbarDuration.Short)
+                        viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = it.message.toString()))
                         viewModel.clearUserInfo()
-                        viewModel.setEvent(
-                            SignInContract.SignInEvent.SetUserProfile(
-                                userProfileLoadState = LoadState.Error,
-                                profile = Profile()
-                            )
-                        )
+                        viewModel.setEvent(SignInContract.SignInEvent.SetUserProfile(userProfileLoadState = LoadState.Error, profile = Profile()))
                     }
             }
         }
@@ -212,6 +194,15 @@ fun SignInRoute(
 
     LaunchedEffect(Unit) {
         viewModel.getUserProfile()
+    }
+
+    LaunchedEffect(viewModel.sideEffect, lifecycleOwner) {
+        viewModel.sideEffect.flowWithLifecycle(lifecycle = lifecycleOwner.lifecycle)
+            .collect { signInSideEffect ->
+                when (signInSideEffect) {
+                    is SignInContract.SignInSideEffect.ShowSnackbar -> onShowSnackbar(signInSideEffect.message, signInSideEffect.duration)
+                }
+            }
     }
 
     LaunchedEffect(uiState.autoLoginLoadState) {
@@ -245,11 +236,7 @@ fun SignInRoute(
                     }
                 }
 
-                viewModel.setEvent(
-                    SignInContract.SignInEvent.OnSuccessLogin(
-                        loadState = if (isLoginSuccessful) LoadState.Success else LoadState.Idle
-                    )
-                )
+                viewModel.setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = if (isLoginSuccessful) LoadState.Success else LoadState.Idle))
             }
 
             else -> Unit
@@ -264,9 +251,7 @@ fun SignInRoute(
                     viewModel.currentState.profile.email,
                     viewModel.currentState.profile.uid
                 ).addOnSuccessListener {
-                    viewModel.setEvent(
-                        SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Error)
-                    )
+                    viewModel.setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Error))
                 }.addOnFailureListener { outerException ->
                     // 기존 사용자 파이어베이스 로그인
                     if (outerException is FirebaseAuthUserCollisionException) {
@@ -274,38 +259,26 @@ fun SignInRoute(
                             viewModel.currentState.profile.email,
                             viewModel.currentState.profile.uid
                         ).addOnSuccessListener {
-                            viewModel.setEvent(
-                                SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success)
-                            )
+                            viewModel.setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Success))
                         }.addOnFailureListener { innerException ->
                             onShowSnackbar(innerException.message.toString(), SnackbarDuration.Short)
+                            viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = context.getString(R.string.app_finish_toast)))
                             viewModel.clearUserInfo()
                             signOutFromPlatform(viewModel.currentState.profile.platform)
-                            viewModel.setEvent(
-                                SignInContract.SignInEvent.SetUserProfile(
-                                    userProfileLoadState = LoadState.Error,
-                                    profile = Profile()
-                                )
-                            )
+                            viewModel.setEvent(SignInContract.SignInEvent.SetUserProfile(userProfileLoadState = LoadState.Error, profile = Profile()))
                         }
                     } else {
                         onShowSnackbar(outerException.message.toString(), SnackbarDuration.Short)
+                        viewModel.setSideEffect(SignInContract.SignInSideEffect.ShowSnackbar(message = context.getString(R.string.app_finish_toast)))
                         viewModel.clearUserInfo()
                         signOutFromPlatform(viewModel.currentState.profile.platform)
-                        viewModel.setEvent(
-                            SignInContract.SignInEvent.SetUserProfile(
-                                userProfileLoadState = LoadState.Error,
-                                profile = Profile()
-                            )
-                        )
+                        viewModel.setEvent(SignInContract.SignInEvent.SetUserProfile(userProfileLoadState = LoadState.Error, profile = Profile()))
                     }
                 }
             }
 
             LoadState.Error -> {
-                viewModel.setEvent(
-                    SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Idle)
-                )
+                viewModel.setEvent(SignInContract.SignInEvent.OnSuccessLogin(loadState = LoadState.Idle))
             }
 
             else -> Unit
@@ -315,21 +288,9 @@ fun SignInRoute(
     when (uiState.loadState) {
         LoadState.Idle -> {
             SignInScreen(
-                onKakaoSignInClicked = {
-                    setLayoutLoginKakaoClickListener(
-                        context = context,
-                        callback = oauthKakaoLoginCallback
-                    )
-                },
-                onNaverSignInClicked = {
-                    setLayoutLoginNaverClickListener(
-                        context = context,
-                        callback = oauthNaverLoginCallback
-                    )
-                },
-                onGoogleSignInClicked = {
-                    googleLoginForResult.launch(getGoogleClient(context).signInIntent)
-                }
+                onKakaoSignInClicked = { setLayoutLoginKakaoClickListener(context = context, callback = oauthKakaoLoginCallback) },
+                onNaverSignInClicked = { setLayoutLoginNaverClickListener(context = context, callback = oauthNaverLoginCallback) },
+                onGoogleSignInClicked = { googleLoginForResult.launch(getGoogleClient(context).signInIntent) }
             )
         }
 

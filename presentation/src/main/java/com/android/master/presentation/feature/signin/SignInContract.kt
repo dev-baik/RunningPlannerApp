@@ -1,5 +1,6 @@
 package com.android.master.presentation.feature.signin
 
+import androidx.compose.material3.SnackbarDuration
 import com.android.master.domain.model.Profile
 import com.android.master.presentation.util.base.UiEvent
 import com.android.master.presentation.util.base.UiSideEffect
@@ -14,7 +15,9 @@ class SignInContract {
         val profile: Profile = Profile()
     ) : UiState
 
-    sealed interface SignInSideEffect : UiSideEffect
+    sealed interface SignInSideEffect : UiSideEffect {
+        data class ShowSnackbar(val message: String, val duration: SnackbarDuration = SnackbarDuration.Short) : SignInSideEffect
+    }
 
     sealed class SignInEvent : UiEvent {
         data class OnSuccessLogin(val loadState: LoadState) : SignInEvent()

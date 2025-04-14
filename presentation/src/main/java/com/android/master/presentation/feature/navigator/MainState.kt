@@ -15,7 +15,7 @@ class MainState(
     val coroutineScope: CoroutineScope
 ) {
 
-    fun showSnackbar(message: String, duration: SnackbarDuration = SnackbarDuration.Short) {
+    fun showSnackbar(message: String, duration: SnackbarDuration) {
         coroutineScope.launch {
             snackbarHostState.showSnackbar(
                 message = message,

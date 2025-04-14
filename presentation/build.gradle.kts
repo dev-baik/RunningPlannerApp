@@ -22,10 +22,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "KAKAO_NATIVE_API_KEY", properties["kakao.navtive.app.key"].toString())
-        buildConfigField("String", "NAVER_CLIENT_ID", properties["NAVER_CLIENT_ID"].toString())
-        buildConfigField("String", "NAVER_CLIENT_NAME", properties["NAVER_CLIENT_NAME"].toString())
-        buildConfigField("String", "NAVER_CLIENT_SECRET", properties["NAVER_CLIENT_SECRET"].toString())
-        buildConfigField("String", "GOOGLE_CLIENT_ID", properties["GOOGLE_CLIENT_ID"].toString())
+        buildConfigField("String", "NAVER_CLIENT_ID", properties["naver.client.id"].toString())
+        buildConfigField("String", "NAVER_CLIENT_NAME", properties["naver.client.name"].toString())
+        buildConfigField("String", "NAVER_CLIENT_SECRET", properties["naver.client.secret"].toString())
+        buildConfigField("String", "GOOGLE_CLIENT_ID", properties["google.client.id"].toString())
 
         manifestPlaceholders["KAKAO_NATIVE_APP_KEY_MANIFEST"] = properties["kakao.native.app.key.manifest"] as String
     }
@@ -109,4 +109,15 @@ dependencies {
 
     // google
     implementation(libs.play.services.auth)
+
+    // paging
+    implementation(libs.paging.runtime.ktx)
+    implementation(libs.paging.compose)
+
+    // glide
+    implementation(libs.glide)
+
+    // exoplayer
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
 }

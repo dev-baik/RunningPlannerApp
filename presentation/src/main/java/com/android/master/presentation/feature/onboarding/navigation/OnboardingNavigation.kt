@@ -17,7 +17,7 @@ fun NavController.navigationOnboarding(navOptions: NavOptions) {
 
 fun NavGraphBuilder.onboardingNavGraph(
     padding: PaddingValues,
-    navigateToHome: (NavOptions) -> Unit,
+    navigateToHome: () -> Unit,
     onShowSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     composable(route = OnboardingRoute.ROUTE) {

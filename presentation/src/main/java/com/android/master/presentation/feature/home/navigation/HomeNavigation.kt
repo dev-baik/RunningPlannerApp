@@ -16,11 +16,13 @@ fun NavHostController.navigationHome(navOptions: NavOptions) {
 }
 
 fun NavGraphBuilder.homeNavGraph(
-    padding: PaddingValues
+    padding: PaddingValues,
+    onVideoButtonClicked: () -> Unit
 ) {
     composable(route = MainNavigationBarRoute.Home::class.simpleName.orEmpty()) {
         HomeRoute(
-            padding = padding
+            padding = padding,
+            onVideoButtonClicked = onVideoButtonClicked
         )
     }
 }

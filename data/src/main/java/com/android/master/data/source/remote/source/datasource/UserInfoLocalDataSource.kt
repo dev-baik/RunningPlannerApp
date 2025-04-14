@@ -1,4 +1,4 @@
-package com.android.master.data.datasource
+package com.android.master.data.source.remote.source.datasource
 
 import com.android.master.domain.model.Profile
 

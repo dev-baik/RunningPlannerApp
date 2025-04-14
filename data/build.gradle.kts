@@ -1,8 +1,14 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+}
+
+val properties = Properties().apply {
+    load(project.rootProject.file("local.properties").inputStream())
 }
 
 android {
@@ -14,6 +20,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "BASE_URL", properties["base.url"].toString())
+        buildConfigField("String", "PIXABAY_API_KEY", properties["pixabay.api.key"].toString())
     }
 
     buildTypes {
@@ -53,4 +62,18 @@ dependencies {
 
     // gson
     implementation(libs.gson)
+
+    // okhttp
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+
+    // retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+
+    // moshi
+    implementation(libs.moshi.kotlin)
+
+    // paging
+    implementation(libs.paging.runtime.ktx)
 }

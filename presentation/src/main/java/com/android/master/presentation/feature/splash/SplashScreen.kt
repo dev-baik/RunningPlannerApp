@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,7 +28,6 @@ import com.android.master.presentation.R
 import com.android.master.presentation.ui.theme.Blue
 import com.android.master.presentation.ui.theme.RPAPPTheme
 import com.android.master.presentation.ui.theme.RPAppTheme
-import com.android.master.presentation.ui.theme.White
 
 @Preview
 @Composable
@@ -44,24 +42,13 @@ fun SplashScreen() {
     val view by rememberUpdatedState(LocalView.current)
     val window = remember { (view.context as? ComponentActivity)?.window }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(Unit) {
         window?.let {
             setSystemBarStyle(
                 window = window,
                 view = view,
                 isLightTheme = false,
                 barColor = Blue.toArgb(),
-            )
-        }
-    }
-
-    DisposableEffect(key1 = Unit) {
-        onDispose {
-            setSystemBarStyle(
-                window = window,
-                view = view,
-                isLightTheme = true,
-                barColor = White.toArgb(),
             )
         }
     }

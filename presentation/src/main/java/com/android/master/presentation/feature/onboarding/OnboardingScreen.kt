@@ -28,11 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.flowWithLifecycle
-import androidx.navigation.NavOptions
-import androidx.navigation.navOptions
 import com.android.master.presentation.Onboarding.FIRST
 import com.android.master.presentation.R
-import com.android.master.presentation.feature.onboarding.navigation.OnboardingRoute
 import com.android.master.presentation.type.OnboardingType
 import com.android.master.presentation.ui.component.button.RPAppOutlinedButton
 import com.android.master.presentation.ui.component.dotsindicator.DotsIndicator
@@ -58,7 +55,7 @@ fun OnboardingRoute(
     viewModel: OnBoardingViewModel = hiltViewModel(),
     padding: PaddingValues,
     onShowSnackbar: (String, SnackbarDuration) -> Unit,
-    navigateToHome: (NavOptions) -> Unit
+    navigateToHome: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -72,7 +69,7 @@ fun OnboardingRoute(
                 if (System.currentTimeMillis() - backPressedTime <= 500L) {
                     context.findActivity().finish()
                 } else {
-                    onShowSnackbar(context.getString(R.string.app_finish_toast), SnackbarDuration.Short)
+                    viewModel.setSideEffect(OnBoardingContract.OnBoardingSideEffect.ShowSnackbar(message = context.getString(R.string.app_finish_toast)))
                 }
                 backPressedTime = System.currentTimeMillis()
             }
@@ -89,14 +86,8 @@ fun OnboardingRoute(
         viewModel.sideEffect.flowWithLifecycle(lifecycle = lifecycleOwner.lifecycle)
             .collect { onBoardingSideEffect ->
                 when (onBoardingSideEffect) {
-                    OnBoardingContract.OnBoardingSideEffect.NavigationToHome -> navigateToHome(
-                        navOptions {
-                            popUpTo(OnboardingRoute.ROUTE) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
-                    )
+                    is OnBoardingContract.OnBoardingSideEffect.ShowSnackbar -> onShowSnackbar(onBoardingSideEffect.message, onBoardingSideEffect.duration)
+                    is OnBoardingContract.OnBoardingSideEffect.NavigationToHome -> navigateToHome()
                 }
             }
     }
